@@ -20,10 +20,12 @@ Why does this file exist, and why not put this in __main__?
 """
 
 import argparse
+import os
 import sys
 from io import TextIOWrapper
 
 import sqlparse
+from sqlparse import config as spconfig
 from sqlparse.exceptions import SQLParseError
 
 
@@ -40,6 +42,19 @@ def create_parser():
     )
 
     parser.add_argument('filename')
+
+    parser.add_argument(
+        '--style',
+        dest='style',
+        metavar='STYLE',
+        help='Formatting style (name, "file", or inline YAML)')
+
+    parser.add_argument(
+        '--dump-config',
+        dest='dump_config',
+        action='store_true',
+        default=False,
+        help='Dump configuration and exit')
 
     parser.add_argument(
         '-o', '--outfile',
@@ -59,6 +74,7 @@ def create_parser():
         metavar='CHOICE',
         dest='keyword_case',
         choices=_CASE_CHOICES,
+        default=None,
         help='change case of keywords, CHOICE is one of {}'.format(
             ', '.join('"{}"'.format(x) for x in _CASE_CHOICES)))
 
@@ -67,6 +83,7 @@ def create_parser():
         metavar='CHOICE',
         dest='identifier_case',
         choices=_CASE_CHOICES,
+        default=None,
         help='change case of identifiers, CHOICE is one of {}'.format(
             ', '.join('"{}"'.format(x) for x in _CASE_CHOICES)))
 
@@ -75,6 +92,7 @@ def create_parser():
         metavar='LANG',
         dest='output_format',
         choices=['python', 'php'],
+        default=None,
         help='output a snippet in programming language LANG, '
              'choices are "python", "php"')
 
@@ -82,20 +100,20 @@ def create_parser():
         '--strip-comments',
         dest='strip_comments',
         action='store_true',
-        default=False,
+        default=None,
         help='remove comments')
 
     group.add_argument(
         '-r', '--reindent',
         dest='reindent',
         action='store_true',
-        default=False,
+        default=None,
         help='reindent statements')
 
     group.add_argument(
         '--indent_width',
         dest='indent_width',
-        default=2,
+        default=None,
         type=int,
         help='indentation width (defaults to 2 spaces)')
 
@@ -103,46 +121,46 @@ def create_parser():
         '--indent_after_first',
         dest='indent_after_first',
         action='store_true',
-        default=False,
+        default=None,
         help='indent after first line of statement (e.g. SELECT)')
 
     group.add_argument(
         '--indent_columns',
         dest='indent_columns',
         action='store_true',
-        default=False,
+        default=None,
         help='indent all columns by indent_width instead of keyword length')
 
     group.add_argument(
         '-a', '--reindent_aligned',
         action='store_true',
-        default=False,
+        default=None,
         help='reindent statements to aligned format')
 
     group.add_argument(
         '-s', '--use_space_around_operators',
         action='store_true',
-        default=False,
+        default=None,
         help='place spaces around mathematical operators')
 
     group.add_argument(
         '--wrap_after',
         dest='wrap_after',
-        default=0,
+        default=None,
         type=int,
         help='Column after which lists should be wrapped')
 
     group.add_argument(
         '--comma_first',
         dest='comma_first',
-        default=False,
+        default=None,
         type=bool,
         help='Insert linebreak before comma (default False)')
 
     group.add_argument(
         '--compact',
         dest='compact',
-        default=False,
+        default=None,
         type=bool,
         help='Try to produce more compact output (default False)')
 
@@ -164,6 +182,24 @@ def _error(msg):
 def main(args=None):
     parser = create_parser()
     args = parser.parse_args(args)
+    if args.filename == '-':
+        cfg_path = os.getcwd()
+    else:
+        cfg_path = args.filename
+    options = spconfig.load_config(cfg_path)
+    try:
+        options.update(spconfig.load_style(args.style))
+    except ValueError as e:
+        return _error(str(e))
+
+    arg_dict = vars(args)
+    for key in spconfig.DEFAULT_CONFIG.keys():
+        if key in arg_dict and arg_dict[key] is not None:
+            options[key] = arg_dict[key]
+
+    if args.dump_config:
+        sys.stdout.write(spconfig.dump_config(options))
+        return 0
 
     if args.filename == '-':  # read from stdin
         wrapper = TextIOWrapper(sys.stdin.buffer, encoding=args.encoding)
@@ -189,9 +225,8 @@ def main(args=None):
     else:
         stream = sys.stdout
 
-    formatter_opts = vars(args)
     try:
-        formatter_opts = sqlparse.formatter.validate_options(formatter_opts)
+        formatter_opts = sqlparse.formatter.validate_options(options)
     except SQLParseError as e:
         return _error('Invalid options: {}'.format(e))
 

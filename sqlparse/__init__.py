@@ -14,10 +14,11 @@ from sqlparse import engine
 from sqlparse import tokens
 from sqlparse import filters
 from sqlparse import formatter
+from sqlparse import config
 
 
-__version__ = '0.5.4.dev0'
-__all__ = ['engine', 'filters', 'formatter', 'sql', 'tokens', 'cli']
+__version__ = '0.5.3'
+__all__ = ['engine', 'filters', 'formatter', 'sql', 'tokens', 'cli', 'config']
 
 
 def parse(sql, encoding=None):
