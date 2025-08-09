@@ -120,3 +120,18 @@ def test_encoding(filepath, capsys):
     sqlparse.cli.main([path, '--encoding=cp1251'])
     out, _ = capsys.readouterr()
     assert out == expected
+
+
+def test_dump_config(filepath, capsys):
+    path = filepath('function.sql')
+    sqlparse.cli.main([path, '--dump-config'])
+    out, _ = capsys.readouterr()
+    assert 'IndentWidth: 2' in out
+
+
+def test_style_option(filepath, load_file, capsys):
+    path = filepath('begintag.sql')
+    expected = 'BEGIN;\nUPDATE foo\n       SET bar = 1;\nCOMMIT;'
+    sqlparse.cli.main([path, '--style', 'mysql'])
+    out, _ = capsys.readouterr()
+    assert out == expected
