@@ -47,5 +47,7 @@ class FilterStack:
                     stmt = filter_.process(stmt)
 
                 yield stmt
-        except RecursionError as err:
-            raise SQLParseError('Maximum recursion depth exceeded') from err
+        except RuntimeError as err:
+            if 'maximum recursion depth exceeded' in str(err).lower():
+                raise SQLParseError('Maximum recursion depth exceeded')
+            raise
