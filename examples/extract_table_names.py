@@ -31,7 +31,8 @@ def extract_from_part(parsed):
     for item in parsed.tokens:
         if from_seen:
             if is_subselect(item):
-                yield from extract_from_part(item)
+                for sub in extract_from_part(item):
+                    yield sub
             elif item.ttype is Keyword:
                 return
             else:
