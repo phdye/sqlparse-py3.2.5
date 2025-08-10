@@ -1,3 +1,0 @@
-[submodule "sub/python-3.2.5-pkgs-as-installed"]
-	path = sub/python-3.2.5-pkgs-as-installed
-	url = https://github.com/phdye/python-3.2.5-pkgs-as-installed.git
