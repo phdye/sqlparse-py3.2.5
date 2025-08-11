@@ -5,6 +5,8 @@ User Interfaces
   The ``sqlformat`` command line script ist distributed with the module.
   Run :command:`sqlformat --help` to list available options and for usage
   hints.
+  It understands a ``--dialect`` (or ``--flavor``) option which selects the
+  SQL dialect to be used.
 
 ``sqlformat.appspot.com``
   An example `Google App Engine <https://cloud.google.com/appengine/>`_

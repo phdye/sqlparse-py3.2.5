@@ -24,8 +24,17 @@ class Lexer:
     """The Lexer supports configurable syntax.
     To add support for additional keywords, use the `add_keywords` method."""
 
-    _default_instance = None
+    _instances = {}
     _lock = Lock()
+    _dialects = {}
+    _aliases = {}
+
+    @classmethod
+    def register_dialect(cls, name, initializer, aliases=()):
+        name = name.lower()
+        cls._dialects[name] = initializer
+        for alias in aliases:
+            cls._aliases[alias.lower()] = name
 
     # Development notes:
     # - This class is prepared to be able to support additional SQL dialects
@@ -46,29 +55,41 @@ class Lexer:
     #   default_instance part needing to change interface.
 
     @classmethod
+    def get_instance(cls, dialect='default'):
+        """Return a lexer instance initialized for *dialect*."""
+        name = cls._aliases.get((dialect or 'default').lower(),
+                                (dialect or 'default').lower())
+        with cls._lock:
+            inst = cls._instances.get(name)
+            if inst is None:
+                inst = cls()
+                init = cls._dialects.get(name)
+                if init is None:
+                    raise ValueError("Unknown dialect: %s" % name)
+                init(inst)
+                cls._instances[name] = inst
+            return inst
+
+    @classmethod
     def get_default_instance(cls):
         """Returns the lexer instance used internally
         by the sqlparse core functions."""
-        with cls._lock:
-            if cls._default_instance is None:
-                cls._default_instance = cls()
-                cls._default_instance.default_initialization()
-        return cls._default_instance
+        return cls.get_instance('default')
 
-    def default_initialization(self):
-        """Initialize the lexer with default dictionaries.
-        Useful if you need to revert custom syntax settings."""
+    def _init_with(self, *kwdicts):
+        """Helper to initialize lexer with common regex and keywords."""
         self.clear()
         self.set_SQL_REGEX(keywords.SQL_REGEX)
         self.add_keywords(keywords.KEYWORDS_COMMON)
-        self.add_keywords(keywords.KEYWORDS_ORACLE)
-        self.add_keywords(keywords.KEYWORDS_MYSQL)
-        self.add_keywords(keywords.KEYWORDS_PLPGSQL)
-        self.add_keywords(keywords.KEYWORDS_HQL)
-        self.add_keywords(keywords.KEYWORDS_MSACCESS)
-        self.add_keywords(keywords.KEYWORDS_SNOWFLAKE)
-        self.add_keywords(keywords.KEYWORDS_BIGQUERY)
+        for kw in kwdicts:
+            self.add_keywords(kw)
         self.add_keywords(keywords.KEYWORDS)
+
+    def default_initialization(self):
+        init = self.__class__._dialects.get('default')
+        if init is None:
+            raise ValueError('Unknown dialect: default')
+        init(self)
 
     def clear(self):
         """Clear all syntax configurations.
@@ -151,11 +172,26 @@ class Lexer:
             else:
                 yield tokens.Error, char
 
+try:
+    import sqlparse.dialects  # noqa: F401
+except Exception:
+    pass
 
-def tokenize(sql, encoding=None):
+try:
+    import pkg_resources
+    for ep in pkg_resources.iter_entry_points('sqlparse.dialect'):
+        try:
+            ep.load()
+        except Exception:
+            pass
+except Exception:
+    pass
+
+
+def tokenize(sql, encoding=None, dialect=None):
     """Tokenize sql.
 
     Tokenize *sql* using the :class:`Lexer` and return a 2-tuple stream
     of ``(token type, value)`` items.
     """
-    return Lexer.get_default_instance().get_tokens(sql, encoding)
+    return Lexer.get_instance(dialect).get_tokens(sql, encoding)

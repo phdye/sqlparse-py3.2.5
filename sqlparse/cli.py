@@ -170,6 +170,13 @@ def create_parser():
         default='utf-8',
         help='Specify the input encoding (default utf-8)')
 
+    group.add_argument(
+        '--dialect', '--flavor',
+        dest='dialect',
+        metavar='DIALECT',
+        default=None,
+        help='Specify SQL dialect (default flexible)')
+
     return parser
 
 
