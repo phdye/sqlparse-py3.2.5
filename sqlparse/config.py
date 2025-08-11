@@ -9,6 +9,7 @@ except Exception:  # pragma: no cover
 
 # Default style options in internal (snake_case) names
 DEFAULT_CONFIG = {
+    'dialect': 'default',
     'keyword_case': None,
     'identifier_case': None,
     'output_format': None,
@@ -38,6 +39,8 @@ PREDEFINED_STYLES = {
 
 # Mapping from config file keys to internal names
 KEY_MAP = {
+    'Dialect': 'dialect',
+    'Flavor': 'dialect',
     'KeywordCase': 'keyword_case',
     'IdentifierCase': 'identifier_case',
     'OutputFormat': 'output_format',

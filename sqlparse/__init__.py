@@ -21,24 +21,24 @@ __version__ = '0.5.3'
 __all__ = ['engine', 'filters', 'formatter', 'sql', 'tokens', 'cli', 'config']
 
 
-def parse(sql, encoding=None):
+def parse(sql, encoding=None, dialect=None):
     """Parse sql and return a list of statements.
 
     :param sql: A string containing one or more SQL statements.
     :param encoding: The encoding of the statement (optional).
     :returns: A tuple of :class:`~sqlparse.sql.Statement` instances.
     """
-    return tuple(parsestream(sql, encoding))
+    return tuple(parsestream(sql, encoding, dialect))
 
 
-def parsestream(stream, encoding=None):
+def parsestream(stream, encoding=None, dialect=None):
     """Parses sql statements from file-like object.
 
     :param stream: A file-like object.
     :param encoding: The encoding of the stream contents (optional).
     :returns: A generator of :class:`~sqlparse.sql.Statement` instances.
     """
-    stack = engine.FilterStack()
+    stack = engine.FilterStack(dialect=dialect)
     stack.enable_grouping()
     return stack.run(stream, encoding)
 
@@ -53,14 +53,15 @@ def format(sql, encoding=None, **options):
 
     :returns: The formatted SQL statement as string.
     """
-    stack = engine.FilterStack()
+    dialect = options.pop('dialect', None)
+    stack = engine.FilterStack(dialect=dialect)
     options = formatter.validate_options(options)
     stack = formatter.build_filter_stack(stack, options)
     stack.postprocess.append(filters.SerializerUnicode())
     return ''.join(stack.run(sql, encoding))
 
 
-def split(sql, encoding=None, strip_semicolon=False):
+def split(sql, encoding=None, dialect=None, strip_semicolon=False):
     """Split *sql* into single statements.
 
     :param sql: A string containing one or more SQL statements.
@@ -69,5 +70,5 @@ def split(sql, encoding=None, strip_semicolon=False):
         (default: False).
     :returns: A list of strings.
     """
-    stack = engine.FilterStack(strip_semicolon=strip_semicolon)
+    stack = engine.FilterStack(dialect=dialect, strip_semicolon=strip_semicolon)
     return [str(stmt).strip() for stmt in stack.run(sql, encoding)]

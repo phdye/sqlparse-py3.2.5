@@ -15,11 +15,12 @@ from sqlparse.filters import StripTrailingSemicolonFilter
 
 
 class FilterStack:
-    def __init__(self, strip_semicolon=False):
+    def __init__(self, dialect=None, strip_semicolon=False):
         self.preprocess = []
         self.stmtprocess = []
         self.postprocess = []
         self._grouping = False
+        self._dialect = dialect
         if strip_semicolon:
             self.stmtprocess.append(StripTrailingSemicolonFilter())
 
@@ -28,7 +29,7 @@ class FilterStack:
 
     def run(self, sql, encoding=None):
         try:
-            stream = lexer.tokenize(sql, encoding)
+            stream = lexer.tokenize(sql, encoding, self._dialect)
             # Process token stream
             for filter_ in self.preprocess:
                 stream = filter_.process(stream)

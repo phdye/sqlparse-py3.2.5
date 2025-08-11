@@ -74,3 +74,13 @@ a keyword to the lexer:
 
     # no configuration is passed here. The lexer is used as a singleton.
     sqlparse.parse("select * from foo zorder by bar;")
+
+Selecting built-in dialects
+---------------------------
+
+Sqlparse ships with a set of predefined SQL dialects.  They can be chosen by
+passing a ``dialect`` argument to :func:`sqlparse.parse`,
+:func:`sqlparse.format` or :func:`sqlparse.split`.  The command line interface
+``sqlformat`` exposes the same feature via the ``--dialect`` (or ``--flavor``)
+option.  The default dialect is ``flexible`` which resembles the historical
+behaviour of :mod:`sqlparse`.
