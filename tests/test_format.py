@@ -638,6 +638,19 @@ class TestFormatReindent:
             '     , (5, 6)'])
 
 
+    def test_select_into(self):
+        f = lambda sql: sqlparse.format(sql, reindent=True)
+        s = ('select first_name, last_name into :firstName, :lastName '
+             'from employees where employee_id = :id;')
+        assert f(s) == '\n'.join([
+            'select first_name,',
+            '       last_name',
+            'into :firstName,',
+            '     :lastName',
+            'from employees',
+            'where employee_id = :id;'])
+
+
 class TestOutputFormat:
     def test_python(self):
         sql = 'select * from foo;'

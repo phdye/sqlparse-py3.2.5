@@ -54,7 +54,8 @@ class ReindentFilter:
     def _next_token(self, tlist, idx=-1):
         split_words = ('FROM', 'STRAIGHT_JOIN$', 'JOIN$', 'AND', 'OR',
                        'GROUP BY', 'ORDER BY', 'UNION', 'VALUES',
-                       'SET', 'BETWEEN', 'EXCEPT', 'HAVING', 'LIMIT')
+                       'SET', 'BETWEEN', 'EXCEPT', 'HAVING', 'LIMIT',
+                       'INTO')
         m_split = T.Keyword, split_words, True
         tidx, token = tlist.token_next_by(m=m_split, idx=idx)
 
@@ -69,6 +70,12 @@ class ReindentFilter:
     def _split_kwds(self, tlist):
         tidx, token = self._next_token(tlist)
         while token:
+            if token.normalized == 'INTO':
+                _, prev_kw = tlist.token_prev(tidx, skip_ws=True)
+                if prev_kw and prev_kw.normalized == 'INSERT':
+                    tidx, token = self._next_token(tlist, tidx)
+                    continue
+
             pidx, prev_ = tlist.token_prev(tidx, skip_ws=False)
             uprev = str(prev_)
 
