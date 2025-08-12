@@ -2,12 +2,12 @@
 
 ## dialect
 - mode: implemented
-- strict_keywords: not implemented
+- strict_keywords: implemented
 
 ## layout
 - column_limit: implemented
 - indent_width: implemented
-- continuation_indent: not implemented
+- continuation_indent: implemented
 - use_tab: implemented
 - newline_at_eof: implemented
 
@@ -28,46 +28,46 @@
 - keep_quoted_case: not implemented
 
 ## lists
-- bin_pack: not implemented
-- align_after_open_paren: not implemented
-- break_after_comma: not implemented
-- leading_commas: not implemented
-- trailing_comma_in_select: not implemented
-- wrap_after: not implemented
+- bin_pack: implemented
+- align_after_open_paren: implemented
+- break_after_comma: implemented
+- leading_commas: implemented
+- trailing_comma_in_select: implemented
+- wrap_after: implemented
 
 ## clauses
-- break.select: not implemented
-- break.from: not implemented
-- break.where: not implemented
-- break.group_by: not implemented
-- break.having: not implemented
-- break.order_by: not implemented
-- break.window: not implemented
-- break.join: not implemented
-- break.on: not implemented
-- break.with: not implemented
-- break.values: not implemented
-- blank_lines.before_with: not implemented
-- blank_lines.before_create: not implemented
-- blank_lines.before_block: not implemented
+- break.select: implemented
+- break.from: implemented
+- break.where: implemented
+- break.group_by: implemented
+- break.having: implemented
+- break.order_by: implemented
+- break.window: implemented
+- break.join: implemented
+- break.on: implemented
+- break.with: implemented
+- break.values: implemented
+- blank_lines.before_with: implemented
+- blank_lines.before_create: implemented
+- blank_lines.before_block: implemented
 
 ## joins
-- join_on_new_line: not implemented
-- align_on_under_join: not implemented
-- prefer_explicit: not implemented
+- join_on_new_line: implemented
+- align_on_under_join: implemented
+- prefer_explicit: implemented
 
 ## predicates
-- layout: not implemented
+- layout: implemented
 
 ## case_expr
-- indent_when_then: not implemented
-- align_then: not implemented
-- end_align_with_case: not implemented
+- indent_when_then: implemented
+- align_then: implemented
+- end_align_with_case: implemented
 
 ## cte
-- one_per_line: not implemented
-- blank_line_between: not implemented
-- trailing_comma_style: not implemented
+- one_per_line: implemented
+- blank_line_between: implemented
+- trailing_comma_style: implemented
 
 ## subqueries
 - open_paren_same_line: implemented
