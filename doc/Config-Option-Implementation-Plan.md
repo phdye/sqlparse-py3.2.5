@@ -2,6 +2,7 @@
 
 This plan outlines the remaining configuration options from
 `issue/clang-style-parameters.md` that are not yet implemented in sqlparse.
+
 To enable multiple contributors to work concurrently, each phase is scoped to a
 standalone formatter plugin. Plugins are registered via
 `sqlparse/plugins/__init__.py` (see `Formatting-Plugin-Architecture.md`) so that
@@ -85,5 +86,4 @@ phase targets a body of work achievable within a single development session.
 ---
 
 Each phase should add its formatter logic as a plugin in `sqlparse/plugins`,
-update documentation, and ensure compatibility with Python 3.2.5, Cygwin
-1.7.29, and Oracle 12c environments.
+update documentation, and ensure compatibility.
