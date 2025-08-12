@@ -14,5 +14,5 @@ EXEC SQL
      WHERE  employee_id = :id;
 ```
 
-If there do not exist appropriate configuration options, implement such fine-grained configuration options as needed to achieve the required output.   Test thorougly.
+If there do not exist appropriate configuration options, implement such fine-grained configuration options as needed to achieve the required output.   Test thoroughly.
 
