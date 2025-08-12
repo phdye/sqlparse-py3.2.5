@@ -1,0 +1,20 @@
+Revise behavior/down/sqlparse.ini such that this command produces the required output.
+
+Command:
+```
+cat behavior/into.unformatted.sql | PYTHONPATH=. sqlformat --config behavior/down/sqlparse.ini
+```
+
+Required output:  (Identical to the contents of behavior/down/into.expected.sql)
+```
+EXEC SQL
+    SELECT  first_name
+      ,     last_name
+      INTO  :firstName
+      ,     :lastName 
+      FROM  employees 
+     WHERE  employee_id = :id;
+```
+
+If there do not exist appropriate configuration options, implement such fine-grained configuration options as needed to achieve the required output.   Test thorougly.
+
