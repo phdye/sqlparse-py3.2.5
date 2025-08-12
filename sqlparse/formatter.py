@@ -186,7 +186,8 @@ def build_filter_stack(stack, options):
       options: Dictionary with options validated by validate_options.
     """
     # Token filter
-    if options.get('keyword_case'):
+    kw_opts = options.get('keywords', {})
+    if options.get('keyword_case') and not kw_opts.get('reserved_only'):
         stack.preprocess.append(
             filters.KeywordCaseFilter(options['keyword_case']))
 

@@ -61,6 +61,29 @@ def format(sql, encoding=None, **options):
     stack = formatter.build_filter_stack(stack, options)
     stack.postprocess.append(filters.SerializerUnicode())
     result = ''.join(stack.run(sql, encoding))
+
+    # Run formatter plugins if needed. Plugins are loaded lazily so the
+    # registry stays lightweight when no plugin options are supplied.
+    run_plugin = False
+    if options.get('spacing'):
+        run_plugin = True
+    elif options.get('keywords', {}).get('reserved_only'):
+        run_plugin = True
+    elif options.get('identifiers', {}).get('quote_style'):
+        run_plugin = True
+    elif options.get('identifiers', {}).get('keep_quoted_case') is False:
+        run_plugin = True
+
+    if run_plugin:
+        from sqlparse import plugins as _plugins
+        try:
+            __import__('sqlparse.plugins.spacing_casing')
+        except Exception:
+            _plugins = None
+        if _plugins is not None:
+            plugin_cls = _plugins.get_plugin('spacing_casing')
+            if plugin_cls is not None:
+                result = plugin_cls().format(result, options)
     if newline_at_eof is True:
         if not result.endswith('\n'):
             result += '\n'
