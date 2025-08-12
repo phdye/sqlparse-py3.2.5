@@ -101,6 +101,9 @@ def test_load_clang_config_full_sections(tmpdir):
         'create_table:\n'
         '  align_columns: false\n'
         'comments:\n'
+        '  reflow_block_comments: true\n'
+        '  keep_trailing_line_comment_with_code: false\n'
+        '  pragma_freeze_directives: true\n'
         '  preserve_comment_position: true\n'
         'penalties:\n'
         '  over_column_limit: 500\n'
@@ -123,5 +126,8 @@ def test_load_clang_config_full_sections(tmpdir):
     assert opts['blocks']['begin_same_line'] is False
     assert opts['declarations']['one_per_line'] is True
     assert opts['create_table']['align_columns'] is False
+    assert opts['comments']['reflow_block_comments'] is True
+    assert opts['comments']['keep_trailing_line_comment_with_code'] is False
+    assert opts['comments']['pragma_freeze_directives'] is True
     assert opts['comments']['preserve_comment_position'] is True
     assert opts['penalties']['over_column_limit'] == 500
