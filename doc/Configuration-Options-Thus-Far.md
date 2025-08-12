@@ -2,12 +2,12 @@
 
 ## dialect
 - mode: implemented
-- strict_keywords: not implemented
+- strict_keywords: implemented
 
 ## layout
 - column_limit: implemented
 - indent_width: implemented
-- continuation_indent: not implemented
+- continuation_indent: implemented
 - use_tab: implemented
 - newline_at_eof: implemented
 
@@ -36,25 +36,25 @@
 - wrap_after: implemented
 
 ## clauses
-- break.select: not implemented
-- break.from: not implemented
-- break.where: not implemented
-- break.group_by: not implemented
-- break.having: not implemented
-- break.order_by: not implemented
-- break.window: not implemented
-- break.join: not implemented
-- break.on: not implemented
-- break.with: not implemented
-- break.values: not implemented
-- blank_lines.before_with: not implemented
-- blank_lines.before_create: not implemented
-- blank_lines.before_block: not implemented
+- break.select: implemented
+- break.from: implemented
+- break.where: implemented
+- break.group_by: implemented
+- break.having: implemented
+- break.order_by: implemented
+- break.window: implemented
+- break.join: implemented
+- break.on: implemented
+- break.with: implemented
+- break.values: implemented
+- blank_lines.before_with: implemented
+- blank_lines.before_create: implemented
+- blank_lines.before_block: implemented
 
 ## joins
-- join_on_new_line: not implemented
-- align_on_under_join: not implemented
-- prefer_explicit: not implemented
+- join_on_new_line: implemented
+- align_on_under_join: implemented
+- prefer_explicit: implemented
 
 ## predicates
 - layout: not implemented

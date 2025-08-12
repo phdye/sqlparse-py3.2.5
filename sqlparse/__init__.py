@@ -86,6 +86,7 @@ def format(sql, encoding=None, **options):
 
     stack = engine.FilterStack(dialect=dialect)
     options = formatter.validate_options(options)
+    options['dialect'] = dialect
     stack = formatter.build_filter_stack(stack, options)
     stack.postprocess.append(filters.SerializerUnicode())
     result = ''.join(stack.run(sql, encoding))
@@ -94,6 +95,7 @@ def format(sql, encoding=None, **options):
         plugin_cls = plugins.get_plugin(name)
         if plugin_cls is not None:
             result = plugin_cls().format(result, plugin_opts)
+
     if newline_at_eof is True:
         if not result.endswith('\n'):
             result += '\n'
