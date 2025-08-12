@@ -34,6 +34,7 @@ DEFAULT_CONFIG = {
     'indent_tabs': False,
     'newline_at_eof': None,
     'strip_whitespace': False,
+    'strip_trailing_whitespace': True,
     'truncate_strings': None,
     'truncate_char': '[...]',
     'right_margin': None,
@@ -74,6 +75,7 @@ KEY_MAP = {
     'PadAfterKeyword': 'pad_after_keyword',
     'AlignLongestKeyword': 'align_longest_keyword',
     'IdLayout': 'id_layout',
+    'StripTrailingWhitespace': 'strip_trailing_whitespace',
     'BasedOnStyle': 'BasedOnStyle',
 }
 

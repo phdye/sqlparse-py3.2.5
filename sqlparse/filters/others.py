@@ -226,7 +226,11 @@ class StripTrailingSemicolonFilter:
 # postprocess
 
 class SerializerUnicode:
-    @staticmethod
-    def process(stmt):
+    def __init__(self, strip_trailing_whitespace=True):
+        self.strip_trailing_whitespace = strip_trailing_whitespace
+
+    def process(self, stmt):
         lines = split_unquoted_newlines(stmt)
-        return '\n'.join(line.rstrip() for line in lines)
+        if self.strip_trailing_whitespace:
+            lines = [line.rstrip() for line in lines]
+        return '\n'.join(lines)

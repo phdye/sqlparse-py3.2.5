@@ -23,7 +23,8 @@ class AlignedIndentFilter:
 
     def __init__(self, char=' ', n='\n', pad_after_keyword=1,
                  align_longest_keyword=False, id_layout='vertical',
-                 initial_indent=0, initial_pad_after_keyword=None):
+                 initial_indent=0, initial_pad_after_keyword=None,
+                 comma_first=False):
         self.n = n
         self.offset = initial_indent
         self.indent = 0
@@ -32,6 +33,7 @@ class AlignedIndentFilter:
         self.initial_pad_after_keyword = initial_pad_after_keyword
         self.align_longest_keyword = align_longest_keyword
         self.id_layout = id_layout
+        self.comma_first = comma_first
         self._max_kwd_len = len('select')
 
     def nl(self, offset=1):
@@ -79,11 +81,31 @@ class AlignedIndentFilter:
 
     def _process_identifierlist(self, tlist):
         # columns being selected
-        if self.id_layout != 'single_line':
+        if self.id_layout != 'single_line' and not self.comma_first:
             identifiers = list(tlist.get_identifiers())
             identifiers.pop(0)
             [tlist.insert_before(token, self.nl()) for token in identifiers]
         self._process_default(tlist)
+        if self.id_layout != 'single_line' and self.comma_first:
+            identifiers = list(tlist.get_identifiers())
+            pad = self.pad_after_keyword if self.pad_after_keyword is not None else 1
+            nl_value = self.nl(self.char * (self._max_kwd_len - pad)).value
+            pad_after = self.char * (self._max_kwd_len - 1)
+            for token in identifiers[1:]:
+                cidx, comma = tlist.token_prev(tlist.token_index(token), skip_ws=True)
+                if comma is None:
+                    continue
+                pidx, prev_ = tlist.token_prev(cidx, skip_ws=False)
+                while prev_ is not None and prev_.is_whitespace:
+                    tlist.tokens.remove(prev_)
+                    cidx -= 1
+                    pidx, prev_ = tlist.token_prev(cidx, skip_ws=False)
+                nidx, next_ = tlist.token_next(cidx, skip_ws=False)
+                while next_ is not None and next_.is_whitespace:
+                    tlist.tokens.remove(next_)
+                    nidx, next_ = tlist.token_next(cidx, skip_ws=False)
+                tlist.insert_before(comma, sql.Token(T.Whitespace, nl_value))
+                tlist.insert_after(comma, sql.Token(T.Whitespace, pad_after))
 
     def _process_case(self, tlist):
         offset_ = len('case ') + len('when ')

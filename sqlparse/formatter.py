@@ -81,6 +81,12 @@ def validate_options(options):  # noqa: C901
         raise SQLParseError('Invalid value for strip_whitespace: '
                             '{!r}'.format(strip_ws))
 
+    strip_trailing = options.get('strip_trailing_whitespace', True)
+    if strip_trailing not in [True, False]:
+        raise SQLParseError('Invalid value for strip_trailing_whitespace: '
+                            '{!r}'.format(strip_trailing))
+    options['strip_trailing_whitespace'] = strip_trailing
+
     truncate_strings = options.get('truncate_strings')
     if truncate_strings is not None:
         try:
@@ -283,7 +289,8 @@ def build_filter_stack(stack, options):
                 align_longest_keyword=options.get('align_longest_keyword'),
                 id_layout=options.get('id_layout'),
                 initial_indent=options.get('initial_indent', 0),
-                initial_pad_after_keyword=options.get('initial_pad_after_keyword')))
+                initial_pad_after_keyword=options.get('initial_pad_after_keyword'),
+                comma_first=options.get('comma_first')))
 
     if options.get('right_margin'):
         stack.enable_grouping()
