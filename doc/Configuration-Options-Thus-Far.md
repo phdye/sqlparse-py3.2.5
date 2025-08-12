@@ -57,7 +57,7 @@
 - prefer_explicit: implemented
 
 ## predicates
-- layout: not implemented
+- layout: implemented
 
 ## case_expr
 - indent_when_then: not implemented

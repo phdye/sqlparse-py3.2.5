@@ -9,14 +9,24 @@ shared state.
 _registry = {}
 
 
-def register_plugin(name):
-    """Decorator to register *plugin_cls* under *name*."""
+def register_plugin(name, plugin_cls=None):
+    """Register *plugin_cls* under *name*.
 
-    def _inner(plugin_cls):
-        _registry[name] = plugin_cls
-        return plugin_cls
+    Can be used as ``register_plugin('name', cls)`` or as a decorator::
 
-    return _inner
+        @register_plugin('name')
+        class MyPlugin(object):
+            ...
+
+    If a plugin with *name* already exists it will be replaced.
+    """
+    if plugin_cls is None:
+        def decorator(cls):
+            _registry[name] = cls
+            return cls
+        return decorator
+    _registry[name] = plugin_cls
+    return plugin_cls
 
 
 def get_plugin(name):
