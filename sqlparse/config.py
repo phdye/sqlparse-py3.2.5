@@ -83,6 +83,8 @@ def _parse_simple_yaml(text):
         key, value = line.split(':', 1)
         key = key.strip()
         value = value.strip()
+        if value:
+            value = value.split('#', 1)[0].rstrip()
         while indent < indents[-1]:
             stack.pop()
             indents.pop()
