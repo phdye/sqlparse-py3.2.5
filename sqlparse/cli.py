@@ -230,7 +230,7 @@ def main(args=None):
         try:
             with open(args.filename, encoding=args.encoding) as f:
                 data = ''.join(f.readlines())
-        except OSError as e:
+        except (IOError, OSError) as e:
             return _error(
                 'Failed to read {}: {}'.format(args.filename, e))
 
@@ -239,7 +239,7 @@ def main(args=None):
         try:
             stream = open(args.outfile, 'w', encoding=args.encoding)
             close_stream = True
-        except OSError as e:
+        except (IOError, OSError) as e:
             return _error('Failed to open {}: {}'.format(args.outfile, e))
     else:
         stream = sys.stdout
