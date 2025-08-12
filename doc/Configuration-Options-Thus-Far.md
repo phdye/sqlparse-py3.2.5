@@ -87,9 +87,9 @@
 - align_assignment: implemented
 
 ## create_table
-- align_columns: not implemented
-- comma_last: not implemented
-- one_column_per_line: not implemented
+- align_columns: implemented
+- comma_last: implemented
+- one_column_per_line: implemented
 
 ## comments
 - reflow_block_comments: not implemented
