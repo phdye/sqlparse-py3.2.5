@@ -22,12 +22,14 @@ class AlignedIndentFilter:
                    'SET', 'BETWEEN', 'EXCEPT')
 
     def __init__(self, char=' ', n='\n', pad_after_keyword=1,
-                 align_longest_keyword=False, id_layout='vertical'):
+                 align_longest_keyword=False, id_layout='vertical',
+                 initial_indent=0, initial_pad_after_keyword=None):
         self.n = n
-        self.offset = 0
+        self.offset = initial_indent
         self.indent = 0
         self.char = char
         self.pad_after_keyword = pad_after_keyword
+        self.initial_pad_after_keyword = initial_pad_after_keyword
         self.align_longest_keyword = align_longest_keyword
         self.id_layout = id_layout
         self._max_kwd_len = len('select')
@@ -45,7 +47,19 @@ class AlignedIndentFilter:
         if len(tlist.tokens) > 0 and tlist.tokens[0].is_whitespace \
                 and self.indent == 0:
             tlist.tokens.pop(0)
-        if tlist.tokens and tlist.tokens[0].ttype in T.Keyword:
+
+        if self.offset > 0 or self.initial_pad_after_keyword is not None:
+            idx, token = tlist.token_next_by(t=(T.DML,))
+            if token is not None and idx > 0:
+                pidx, prev_ = tlist.token_prev(idx)
+                nl = self.nl(str(token))
+                if prev_ is not None and prev_.ttype in T.Whitespace:
+                    prev_.value = nl.value
+                else:
+                    tlist.insert_before(token, nl)
+            if token is not None:
+                self._pad_after_keyword(tlist, token, initial=True)
+        elif tlist.tokens and tlist.tokens[0].ttype in T.Keyword:
             self._pad_after_keyword(tlist, tlist.tokens[0])
 
         # process the main query body
@@ -103,10 +117,13 @@ class AlignedIndentFilter:
                 tidx, token = self._next_token(tlist, tidx)
         return tidx, token
 
-    def _pad_after_keyword(self, tlist, token):
-        if self.pad_after_keyword is None:
+    def _pad_after_keyword(self, tlist, token, initial=False):
+        pad_len = self.pad_after_keyword
+        if initial and self.initial_pad_after_keyword is not None:
+            pad_len = self.initial_pad_after_keyword
+        if pad_len is None:
             return
-        pad = self.char * self.pad_after_keyword
+        pad = self.char * pad_len
         idx = tlist.token_index(token)
         nidx, next_ = tlist.token_next(idx, skip_ws=False)
         if next_ is None:

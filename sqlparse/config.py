@@ -22,6 +22,8 @@ DEFAULT_CONFIG = {
     'pad_after_keyword': 1,
     'align_longest_keyword': False,
     'id_layout': 'vertical',
+    'initial_indent': 0,
+    'initial_pad_after_keyword': None,
     'use_space_around_operators': False,
     'spaces_in_parens': False,
     'spaces_in_brackets': False,
