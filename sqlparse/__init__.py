@@ -18,8 +18,7 @@ from sqlparse import config
 from sqlparse import plugins
 
 __version__ = '0.5.3'
-__all__ = ['engine', 'filters', 'formatter', 'sql', 'tokens', 'cli', 'config',
-           'plugins']
+__all__ = ['engine', 'filters', 'formatter', 'sql', 'tokens', 'cli', 'config', 'plugins']
 
 
 def parse(sql, encoding=None, dialect=None):

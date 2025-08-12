@@ -34,7 +34,14 @@ def get_plugin(name):
 
     Parameters are intentionally simple for compatibility with Python 3.2.5.
     """
-    return _registry.get(name)
+    cls = _registry.get(name)
+    if cls is None:
+        try:
+            __import__('sqlparse.plugins.{0}'.format(name))
+        except Exception:
+            return None
+        cls = _registry.get(name)
+    return cls
 
 
 def available_plugins():

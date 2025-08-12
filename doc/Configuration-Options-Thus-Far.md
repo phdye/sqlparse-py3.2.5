@@ -70,10 +70,10 @@
 - trailing_comma_style: implemented
 
 ## subqueries
-- open_paren_same_line: not implemented
-- body_indent: not implemented
-- close_paren_align_with_open: not implemented
-- prefer_keyword_on_newline: not implemented
+- open_paren_same_line: implemented
+- body_indent: implemented
+- close_paren_align_with_open: implemented
+- prefer_keyword_on_newline: implemented
 
 ## blocks
 - begin_same_line: not implemented
