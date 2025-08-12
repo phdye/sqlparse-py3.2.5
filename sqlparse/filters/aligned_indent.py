@@ -16,16 +16,20 @@ class AlignedIndentFilter:
     by_words = r'(GROUP|ORDER)\s+BY\b'
     split_words = ('FROM',
                    join_words, 'ON', by_words,
-                   'WHERE', 'AND', 'OR',
+                   'INTO', 'WHERE', 'AND', 'OR',
                    'HAVING', 'LIMIT',
                    'UNION', 'VALUES',
                    'SET', 'BETWEEN', 'EXCEPT')
 
-    def __init__(self, char=' ', n='\n'):
+    def __init__(self, char=' ', n='\n', pad_after_keyword=1,
+                 align_longest_keyword=False, id_layout='vertical'):
         self.n = n
         self.offset = 0
         self.indent = 0
         self.char = char
+        self.pad_after_keyword = pad_after_keyword
+        self.align_longest_keyword = align_longest_keyword
+        self.id_layout = id_layout
         self._max_kwd_len = len('select')
 
     def nl(self, offset=1):
@@ -41,6 +45,8 @@ class AlignedIndentFilter:
         if len(tlist.tokens) > 0 and tlist.tokens[0].is_whitespace \
                 and self.indent == 0:
             tlist.tokens.pop(0)
+        if tlist.tokens and tlist.tokens[0].ttype in T.Keyword:
+            self._pad_after_keyword(tlist, tlist.tokens[0])
 
         # process the main query body
         self._process(sql.TokenList(tlist.tokens))
@@ -59,9 +65,10 @@ class AlignedIndentFilter:
 
     def _process_identifierlist(self, tlist):
         # columns being selected
-        identifiers = list(tlist.get_identifiers())
-        identifiers.pop(0)
-        [tlist.insert_before(token, self.nl()) for token in identifiers]
+        if self.id_layout != 'single_line':
+            identifiers = list(tlist.get_identifiers())
+            identifiers.pop(0)
+            [tlist.insert_before(token, self.nl()) for token in identifiers]
         self._process_default(tlist)
 
     def _process_case(self, tlist):
@@ -96,21 +103,52 @@ class AlignedIndentFilter:
                 tidx, token = self._next_token(tlist, tidx)
         return tidx, token
 
+    def _pad_after_keyword(self, tlist, token):
+        if self.pad_after_keyword is None:
+            return
+        pad = self.char * self.pad_after_keyword
+        idx = tlist.token_index(token)
+        nidx, next_ = tlist.token_next(idx, skip_ws=False)
+        if next_ is None:
+            tlist.insert_after(token, sql.Token(T.Whitespace, pad))
+        elif next_.is_whitespace:
+            next_.value = pad
+        else:
+            tlist.insert_after(token, sql.Token(T.Whitespace, pad))
+
     def _split_kwds(self, tlist):
-        tidx, token = self._next_token(tlist)
-        while token:
-            # joins, group/order by are special case. only consider the first
-            # word as aligner
-            if (
-                token.match(T.Keyword, self.join_words, regex=True)
-                or token.match(T.Keyword, self.by_words, regex=True)
-            ):
-                token_indent = token.value.split()[0]
-            else:
-                token_indent = str(token)
-            tlist.insert_before(token, self.nl(token_indent))
-            tidx += 1
-            tidx, token = self._next_token(tlist, tidx)
+        if self.align_longest_keyword:
+            tokens = []
+            tidx, token = self._next_token(tlist)
+            while token:
+                if (
+                    token.match(T.Keyword, self.join_words, regex=True)
+                    or token.match(T.Keyword, self.by_words, regex=True)
+                ):
+                    token_indent = token.value.split()[0]
+                else:
+                    token_indent = str(token)
+                self._max_kwd_len = max(self._max_kwd_len,
+                                        len(token_indent))
+                tokens.append((token, token_indent))
+                tidx, token = self._next_token(tlist, tidx)
+            for token, token_indent in tokens:
+                tlist.insert_before(token, self.nl(token_indent))
+                self._pad_after_keyword(tlist, token)
+        else:
+            tidx, token = self._next_token(tlist)
+            while token:
+                if (
+                    token.match(T.Keyword, self.join_words, regex=True)
+                    or token.match(T.Keyword, self.by_words, regex=True)
+                ):
+                    token_indent = token.value.split()[0]
+                else:
+                    token_indent = str(token)
+                tlist.insert_before(token, self.nl(token_indent))
+                self._pad_after_keyword(tlist, token)
+                tidx += 1
+                tidx, token = self._next_token(tlist, tidx)
 
     def _process_default(self, tlist):
         self._split_kwds(tlist)

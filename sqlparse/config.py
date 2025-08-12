@@ -19,6 +19,9 @@ DEFAULT_CONFIG = {
     'indent_after_first': False,
     'indent_columns': False,
     'reindent_aligned': False,
+    'pad_after_keyword': 1,
+    'align_longest_keyword': False,
+    'id_layout': 'vertical',
     'use_space_around_operators': False,
     'spaces_in_parens': False,
     'spaces_in_brackets': False,
@@ -66,6 +69,9 @@ KEY_MAP = {
     'TruncateStrings': 'truncate_strings',
     'TruncateChar': 'truncate_char',
     'RightMargin': 'right_margin',
+    'PadAfterKeyword': 'pad_after_keyword',
+    'AlignLongestKeyword': 'align_longest_keyword',
+    'IdLayout': 'id_layout',
     'BasedOnStyle': 'BasedOnStyle',
 }
 

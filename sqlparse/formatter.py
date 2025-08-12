@@ -116,6 +116,24 @@ def validate_options(options):  # noqa: C901
     elif reindent_aligned:
         options['strip_whitespace'] = True
 
+    pad_after_keyword = options.get('pad_after_keyword', 1)
+    if not isinstance(pad_after_keyword, int) or pad_after_keyword < 0:
+        raise SQLParseError('Invalid value for pad_after_keyword: '
+                            '{!r}'.format(pad_after_keyword))
+    options['pad_after_keyword'] = pad_after_keyword
+
+    align_longest_keyword = options.get('align_longest_keyword', False)
+    if align_longest_keyword not in [True, False]:
+        raise SQLParseError('Invalid value for align_longest_keyword: '
+                            '{!r}'.format(align_longest_keyword))
+    options['align_longest_keyword'] = align_longest_keyword
+
+    id_layout = options.get('id_layout', 'vertical')
+    if id_layout not in ['vertical', 'single_line']:
+        raise SQLParseError('Invalid value for id_layout: '
+                            '{!r}'.format(id_layout))
+    options['id_layout'] = id_layout
+
     indent_after_first = options.get('indent_after_first', False)
     if indent_after_first not in [True, False]:
         raise SQLParseError('Invalid value for indent_after_first: '
@@ -236,7 +254,11 @@ def build_filter_stack(stack, options):
     if options.get('reindent_aligned', False):
         stack.enable_grouping()
         stack.stmtprocess.append(
-            filters.AlignedIndentFilter(char=options['indent_char']))
+            filters.AlignedIndentFilter(
+                char=options['indent_char'],
+                pad_after_keyword=options.get('pad_after_keyword'),
+                align_longest_keyword=options.get('align_longest_keyword'),
+                id_layout=options.get('id_layout')))
 
     if options.get('right_margin'):
         stack.enable_grouping()
