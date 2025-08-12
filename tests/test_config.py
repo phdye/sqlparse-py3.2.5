@@ -16,6 +16,15 @@ def test_load_config(tmpdir):
     assert options['keyword_case'] == 'upper'
 
 
+def test_load_config_ignores_comments(tmpdir, monkeypatch):
+    monkeypatch.setattr(config, 'yaml', None)
+    cfg_dir = tmpdir.mkdir('cfg_comment')
+    cfg_file = cfg_dir.join('.sqlparse')
+    cfg_file.write('version: 1\nkeywords:\n  case: upper   # comment\n')
+    options = config.load_config(str(cfg_dir))
+    assert options['keyword_case'] == 'upper'
+
+
 def test_dump_config():
     opts = config.DEFAULT_CONFIG.copy()
     opts['keyword_case'] = 'upper'
