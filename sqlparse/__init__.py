@@ -15,10 +15,12 @@ from sqlparse import tokens
 from sqlparse import filters
 from sqlparse import formatter
 from sqlparse import config
+from sqlparse import plugins
 
 
 __version__ = '0.5.3'
-__all__ = ['engine', 'filters', 'formatter', 'sql', 'tokens', 'cli', 'config']
+__all__ = ['engine', 'filters', 'formatter', 'sql', 'tokens', 'cli', 'config',
+           'plugins']
 
 
 def parse(sql, encoding=None, dialect=None):
@@ -60,6 +62,20 @@ def format(sql, encoding=None, **options):
     stack = formatter.build_filter_stack(stack, options)
     stack.postprocess.append(filters.SerializerUnicode())
     result = ''.join(stack.run(sql, encoding))
+
+    for key in options:
+        if plugins.get_plugin(key) is None:
+            try:
+                __import__('sqlparse.plugins.{0}'.format(key), fromlist=['_'])
+            except Exception:
+                continue
+
+    for name in plugins.available_plugins():
+        if name in options:
+            plugin_cls = plugins.get_plugin(name)
+            if plugin_cls is not None:
+                plugin = plugin_cls()
+                result = plugin.format(result, options)
     if newline_at_eof is True:
         if not result.endswith('\n'):
             result += '\n'
