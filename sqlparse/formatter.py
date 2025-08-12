@@ -129,7 +129,7 @@ def validate_options(options):  # noqa: C901
     options['align_longest_keyword'] = align_longest_keyword
 
     id_layout = options.get('id_layout', 'vertical')
-    if id_layout not in ['vertical', 'single_line']:
+    if id_layout not in ['vertical', 'single_line', 'hanging']:
         raise SQLParseError('Invalid value for id_layout: '
                             '{!r}'.format(id_layout))
     options['id_layout'] = id_layout
