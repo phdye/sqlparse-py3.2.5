@@ -9,7 +9,20 @@ class Subqueries(object):
 
     def format(self, sql, options):
         open_same = options.get('open_paren_same_line', True)
-        body_indent = int(options.get('body_indent', 2))
+        body_indent_opt = options.get('body_indent', 2)
+        if isinstance(body_indent_opt, str):
+            opt = body_indent_opt.lower()
+            if opt == 'plus_one':
+                body_indent = options.get('indent_width', 2)
+            elif opt == 'under_open':
+                body_indent = 0
+            else:
+                try:
+                    body_indent = int(body_indent_opt)
+                except Exception:
+                    body_indent = options.get('indent_width', 2)
+        else:
+            body_indent = int(body_indent_opt)
         close_align = options.get('close_paren_align_with_open', True)
         prefer_kw_newline = options.get('prefer_keyword_on_newline', False)
 
@@ -48,20 +61,21 @@ class Subqueries(object):
 
         positions = find_subqueries(sql)
         for start, end in reversed(positions):
-            indent = calc_indent(sql, start)
             inner = sql[start + 1:end]
+            before = sql[:start]
+            after = sql[end + 1:]
+            if open_same:
+                before_r = before.rstrip()
+                indent = calc_indent(before_r, len(before_r))
+                before = before_r + ' '
+                open_part = '('
+            else:
+                indent = calc_indent(sql, start)
+                before = before.rstrip()
+                open_part = '\n' + ' ' * indent + '('
             formatted = sqlparse.format(inner.strip(), reindent=True,
                                         indent_width=body_indent)
             lines = [l.rstrip() for l in formatted.strip().splitlines()]
-            before = sql[:start]
-            after = sql[end + 1:]
-
-            if open_same:
-                before = before.rstrip() + ' '
-                open_part = '('
-            else:
-                before = before.rstrip()
-                open_part = '\n' + ' ' * indent + '('
 
             if prefer_kw_newline:
                 inner_text = '\n'.join(' ' * (indent + body_indent) + line

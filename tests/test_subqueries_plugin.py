@@ -28,5 +28,21 @@ def test_subquery_close_paren_indent():
             'prefer_keyword_on_newline': True,
         },
     )
-    assert formatted == 'SELECT *\nFROM (\n    SELECT 1\n    ) x'
+    assert formatted == 'SELECT *\nFROM (\n  SELECT 1\n  ) x'
+
+
+def test_subquery_body_indent_plus_one():
+    sql = 'SELECT * FROM (SELECT 1) x'
+    formatted = sqlparse.format(
+        sql,
+        reindent=True,
+        indent_width=4,
+        subqueries={
+            'open_paren_same_line': True,
+            'body_indent': 'plus_one',
+            'close_paren_align_with_open': True,
+            'prefer_keyword_on_newline': True,
+        },
+    )
+    assert formatted == 'SELECT *\nFROM (\n    SELECT 1\n) x'
 
