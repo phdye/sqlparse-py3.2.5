@@ -1,0 +1,291 @@
+Script started on 2025-08-12 08:42:46-04:00 [COMMAND="set -x && make pytest" TERM="screen.xterm-256color" TTY="/dev/pty7" COLUMNS="131" LINES="44"]
++ make pytest
+python3.2 -m pytest tests/
+======================================================= test session starts =======================================================
+platform cygwin -- Python 3.2.5, pytest-2.9.2, py-1.4.29, pluggy-0.3.1
+rootdir: /home/phdyex/my-repos/sqlparse-3.2.5, inifile: 
+collecting 0 items
+collecting 3 items
+collecting 5 items
+collecting 7 items
+collecting 28 items
+collecting 32 items
+collecting 41 items
+collecting 44 items
+collecting 46 items
+collecting 48 items
+collecting 65 items
+collecting 65 items
+collecting 72 items
+collecting 72 items
+collecting 76 items
+collecting 76 items
+collecting 96 items
+collecting 96 items
+collecting 102 items
+collecting 102 items
+collecting 116 items
+collecting 117 items
+collecting 216 items
+collecting 222 items
+collecting 222 items
+collecting 222 items
+collecting 227 items
+collecting 312 items
+collecting 314 items
+collecting 317 items
+collecting 319 items
+collecting 323 items
+collecting 323 items
+collecting 323 items
+collecting 412 items
+collecting 415 items
+collecting 453 items
+collecting 456 items
+collecting 517 items
+collecting 521 items
+collected 521 items 
+tests/test_blocks_plugin.py ...
+tests/test_case_expr_plugin.py ..
+tests/test_clauses_plugin.py ..
+tests/test_cli.py ........F.FFFFFFF.F..
+tests/test_comments_plugin.py ....
+tests/test_config.py .........
+tests/test_create_table_plugin.py ...
+tests/test_dialect.py ..
+tests/test_dialect_strictness.py ..
+tests/test_format.py ..................................................x.............x...
+tests/test_formatter_config.py .
+tests/test_grouping.py ...................................................................................................
+tests/test_keywords.py ......
+tests/test_list_controls.py .....
+tests/test_parse.py .....................................................................................
+tests/test_penalties_plugin.py ..
+tests/test_plugin_joins.py ...
+tests/test_plugins_cte.py ..
+tests/test_predicates.py ....
+tests/test_regressions.py ..............................................................................X..........
+tests/test_spacing_casing_plugin.py ...
+tests/test_split.py ......................................
+tests/test_subqueries_plugin.py ...
+tests/test_tokenize.py .............................................................
+tests/test_utils.py ....
+============================================================ FAILURES =============================================================
+___________________________________________________________ test_stdout ___________________________________________________________
+filepath = <function make_filepath at 0x6fffff412d10>, load_file = <function make_load_file at 0x6fffff412a68>
+capsys = <_pytest.capture.CaptureFixture object at 0x6fffff3fc990>
+    def test_stdout(filepath, load_file, capsys):
+        path = filepath('begintag.sql')
+        expected = load_file('begintag.sql')
+        sqlparse.cli.main([path])
+        out, _ = capsys.readouterr()
+>       assert out == expected
+E       assert 'begin;\n\n\n...\n\ncommit;\n' == 'begin;\nupdat...= 1;\ncommit;'
+E           begin;
+E         + update foo
+E         +        set bar = 1;
+E         - 
+E         - 
+E         - UPDATE foo
+E         - SET bar = 1;
+E         - 
+E         - 
+E           commit;
+tests/test_cli.py:67: AssertionError
+__________________________________________ test_encoding_stdout[encoding_utf8.sql-utf-8] __________________________________________
+fpath = 'encoding_utf8.sql', encoding = 'utf-8', filepath = <function make_filepath at 0x6fffff412e20>
+load_file = <function make_load_file at 0x6fffff4127c0>, capfd = <_pytest.capture.CaptureFixture object at 0x6fffff3a9e10>
+    @pytest.mark.parametrize('fpath, encoding', (
+        ('encoding_utf8.sql', 'utf-8'),
+        ('encoding_gbk.sql', 'gbk'),
+    ))
+    def test_encoding_stdout(fpath, encoding, filepath, load_file, capfd):
+        path = filepath(fpath)
+        expected = load_file(fpath, encoding)
+        sqlparse.cli.main([path, '--encoding', encoding])
+        out, _ = capfd.readouterr()
+>       assert out == expected
+E       assert "SELECT *\nFR...ラフルな雲.사랑해요'\n" == "select *\nfro....カラフルな雲.사랑해요'"
+E         + select *
+E         + from foo
+E         - SELECT *
+E         - FROM foo
+E         - WHERE
+E         -   bar = '齐天大圣.カラフルな雲.사랑해요'
+E         ? ^
+E         + where bar = '齐天大圣.カラフルな雲.사랑해요'
+E         ? ^^^^^
+tests/test_cli.py:85: AssertionError
+___________________________________________ test_encoding_stdout[encoding_gbk.sql-gbk] ____________________________________________
+fpath = 'encoding_gbk.sql', encoding = 'gbk', filepath = <function make_filepath at 0x6fffff479958>
+load_file = <function make_load_file at 0x6fffff4797c0>, capfd = <_pytest.capture.CaptureFixture object at 0x6fffff3fc310>
+    @pytest.mark.parametrize('fpath, encoding', (
+        ('encoding_utf8.sql', 'utf-8'),
+        ('encoding_gbk.sql', 'gbk'),
+    ))
+    def test_encoding_stdout(fpath, encoding, filepath, load_file, capfd):
+        path = filepath(fpath)
+        expected = load_file(fpath, encoding)
+        sqlparse.cli.main([path, '--encoding', encoding])
+        out, _ = capfd.readouterr()
+>       assert out == expected
+E       assert "SELECT *\nFR...'不以物喜，不以己悲'\n" == "select *\nfro...= '不以物喜，不以己悲'"
+E         + select *
+E         + from foo
+E         - SELECT *
+E         - FROM foo
+E         - WHERE
+E         -   bar = '不以物喜，不以己悲'
+E         ? ^
+E         + where bar = '不以物喜，不以己悲'
+E         ? ^^^^^
+tests/test_cli.py:85: AssertionError
+_______________________________________ test_encoding_output_file[encoding_utf8.sql-utf-8] ________________________________________
+fpath = 'encoding_utf8.sql', encoding = 'utf-8', filepath = <function make_filepath at 0x6fffff412628>
+load_file = <function make_load_file at 0x6fffff412380>
+tmpdir = local('/tmp/pytest-of-phdyex/pytest-202/test_encoding_output_file_enco0')
+    @pytest.mark.parametrize('fpath, encoding', (
+        ('encoding_utf8.sql', 'utf-8'),
+        ('encoding_gbk.sql', 'gbk'),
+    ))
+    def test_encoding_output_file(fpath, encoding, filepath, load_file, tmpdir):
+        in_path = filepath(fpath)
+        expected = load_file(fpath, encoding)
+        out_path = tmpdir.dirname + '/encoding_out.sql'
+        sqlparse.cli.main([in_path, '--encoding', encoding, '-o', out_path])
+        out = load_file(out_path, encoding)
+>       assert out == expected
+E       assert "SELECT *\nFR....カラフルな雲.사랑해요'" == "select *\nfro....カラフルな雲.사랑해요'"
+E         + select *
+E         + from foo
+E         - SELECT *
+E         - FROM foo
+E         - WHERE
+E         -   bar = '齐天大圣.カラフルな雲.사랑해요'
+E         ? ^
+E         + where bar = '齐天大圣.カラフルな雲.사랑해요'
+E         ? ^^^^^
+tests/test_cli.py:98: AssertionError
+_________________________________________ test_encoding_output_file[encoding_gbk.sql-gbk] _________________________________________
+fpath = 'encoding_gbk.sql', encoding = 'gbk', filepath = <function make_filepath at 0x6fffff3adb78>
+load_file = <function make_load_file at 0x6fffff3add98>
+tmpdir = local('/tmp/pytest-of-phdyex/pytest-202/test_encoding_output_file_enco1')
+    @pytest.mark.parametrize('fpath, encoding', (
+        ('encoding_utf8.sql', 'utf-8'),
+        ('encoding_gbk.sql', 'gbk'),
+    ))
+    def test_encoding_output_file(fpath, encoding, filepath, load_file, tmpdir):
+        in_path = filepath(fpath)
+        expected = load_file(fpath, encoding)
+        out_path = tmpdir.dirname + '/encoding_out.sql'
+        sqlparse.cli.main([in_path, '--encoding', encoding, '-o', out_path])
+        out = load_file(out_path, encoding)
+>       assert out == expected
+E       assert "SELECT *\nFR...= '不以物喜，不以己悲'" == "select *\nfro...= '不以物喜，不以己悲'"
+E         + select *
+E         + from foo
+E         - SELECT *
+E         - FROM foo
+E         - WHERE
+E         -   bar = '不以物喜，不以己悲'
+E         ? ^
+E         + where bar = '不以物喜，不以己悲'
+E         ? ^^^^^
+tests/test_cli.py:98: AssertionError
+__________________________________________ test_encoding_stdin[encoding_utf8.sql-utf-8] ___________________________________________
+fpath = 'encoding_utf8.sql', encoding = 'utf-8', filepath = <function make_filepath at 0x6fffff412160>
+load_file = <function make_load_file at 0x6fffff420738>, capfd = <_pytest.capture.CaptureFixture object at 0x6fffff3cc490>
+    @pytest.mark.parametrize('fpath, encoding', (
+        ('encoding_utf8.sql', 'utf-8'),
+        ('encoding_gbk.sql', 'gbk'),
+    ))
+    def test_encoding_stdin(fpath, encoding, filepath, load_file, capfd):
+        path = filepath(fpath)
+        expected = load_file(fpath, encoding)
+        old_stdin = sys.stdin
+        with open(path) as f:
+            sys.stdin = f
+            sqlparse.cli.main(['-', '--encoding', encoding])
+        sys.stdin = old_stdin
+        out, _ = capfd.readouterr()
+>       assert out == expected
+E       assert "SELECT *\nFR...ラフルな雲.사랑해요'\n" == "select *\nfro....カラフルな雲.사랑해요'"
+E         + select *
+E         + from foo
+E         - SELECT *
+E         - FROM foo
+E         - WHERE
+E         -   bar = '齐天大圣.カラフルな雲.사랑해요'
+E         ? ^
+E         + where bar = '齐天大圣.カラフルな雲.사랑해요'
+E         ? ^^^^^
+tests/test_cli.py:114: AssertionError
+____________________________________________ test_encoding_stdin[encoding_gbk.sql-gbk] ____________________________________________
+fpath = 'encoding_gbk.sql', encoding = 'gbk', filepath = <function make_filepath at 0x6fffff479f30>
+load_file = <function make_load_file at 0x6fffff4796b0>, capfd = <_pytest.capture.CaptureFixture object at 0x6fffff3b9b50>
+    @pytest.mark.parametrize('fpath, encoding', (
+        ('encoding_utf8.sql', 'utf-8'),
+        ('encoding_gbk.sql', 'gbk'),
+    ))
+    def test_encoding_stdin(fpath, encoding, filepath, load_file, capfd):
+        path = filepath(fpath)
+        expected = load_file(fpath, encoding)
+        old_stdin = sys.stdin
+        with open(path) as f:
+            sys.stdin = f
+            sqlparse.cli.main(['-', '--encoding', encoding])
+        sys.stdin = old_stdin
+        out, _ = capfd.readouterr()
+>       assert out == expected
+E       assert "SELECT *\nFR...'不以物喜，不以己悲'\n" == "select *\nfro...= '不以物喜，不以己悲'"
+E         + select *
+E         + from foo
+E         - SELECT *
+E         - FROM foo
+E         - WHERE
+E         -   bar = '不以物喜，不以己悲'
+E         ? ^
+E         + where bar = '不以物喜，不以己悲'
+E         ? ^^^^^
+tests/test_cli.py:114: AssertionError
+__________________________________________________________ test_encoding __________________________________________________________
+filepath = <function make_filepath at 0x6fffff420270>, capsys = <_pytest.capture.CaptureFixture object at 0x6fffff424f10>
+    def test_encoding(filepath, capsys):
+        path = filepath('test_cp1251.sql')
+        expected = 'insert into foo values (1); -- Песня про надежду\n'
+        sqlparse.cli.main([path, '--encoding=cp1251'])
+        out, _ = capsys.readouterr()
+>       assert out == expected
+E       assert 'INSERT into ...про надежду\n' == 'insert into f...про надежду\n'
+E         - INSERT into foo
+E         - values (1); -- Песня про надежду
+E         + insert into foo values (1); -- Песня про надежду
+E         ? ++++++++++++++++
+tests/test_cli.py:122: AssertionError
+________________________________________________________ test_style_option ________________________________________________________
+filepath = <function make_filepath at 0x6fffff479738>, load_file = <function make_load_file at 0x6fffff4128d0>
+capsys = <_pytest.capture.CaptureFixture object at 0x6fffff3c4d90>
+    def test_style_option(filepath, load_file, capsys):
+        path = filepath('begintag.sql')
+        expected = 'BEGIN;\nUPDATE foo\n       SET bar = 1;\nCOMMIT;'
+        sqlparse.cli.main([path, '--style', 'mysql'])
+        out, _ = capsys.readouterr()
+>       assert out == expected
+E       assert 'begin;\n\n\n...\n\ncommit;\n' == 'BEGIN;\nUPDAT...= 1;\nCOMMIT;'
+E         + BEGIN;
+E         - begin;
+E         - 
+E         - 
+E           UPDATE foo
+E         - SET bar = 1;
+E         +        SET bar = 1;
+E         ? +++++++
+E         + COMMIT;
+E         - 
+E         - 
+E         - commit;
+tests/test_cli.py:137: AssertionError
+=================================== 9 failed, 509 passed, 2 xfailed, 1 xpassed in 1.61 seconds ====================================
+make: *** [Makefile:17: pytest] Error 1
+Script done on 2025-08-12 08:42:48-04:00 [COMMAND_EXIT_CODE="2"]
+
