@@ -1,0 +1,313 @@
+Script started on 2025-08-12 06:46:04-04:00 [COMMAND="set -x && PYTHONPATH=. pytest tests/" TERM="screen.xterm-256color" TTY="/dev/pty7" COLUMNS="131" LINES="44"]
++ PYTHONPATH=.
++ pytest tests/
+======================================================= test session starts =======================================================
+platform cygwin -- Python 3.9.16, pytest-8.3.3, pluggy-1.5.0
+rootdir: /home/phdyex/my-repos/sqlparse-3.2.5
+configfile: pyproject.toml
+plugins: anyio-4.6.2.post1, subprocess-1.5.2
+collecting ... 
+collected 520 items                                                                                                               
+tests/test_blocks_plugin.py ...                                                                                             [  0%]
+tests/test_case_expr_plugin.py ..                                                                                           [  0%]
+tests/test_clauses_plugin.py ..                                                                                             [  1%]
+tests/test_cli.py ...F....F.FFFFFFF.F..                                                                                     [  5%]
+tests/test_comments_plugin.py ....                                                                                          [  6%]
+tests/test_config.py .........                                                                                              [  7%]
+tests/test_create_table_plugin.py ...                                                                                       [  8%]
+tests/test_dialect.py ..                                                                                                    [  8%]
+tests/test_dialect_strictness.py ..                                                                                         [  9%]
+tests/test_format.py ..................................................x.............x...                                   [ 22%]
+tests/test_formatter_config.py .                                                                                            [ 22%]
+tests/test_grouping.py ...................................................................................................  [ 41%]
+tests/test_keywords.py ......                                                                                               [ 42%]
+tests/test_list_controls.py .....                                                                                           [ 43%]
+tests/test_parse.py .....................................................................................                   [ 60%]
+tests/test_penalties_plugin.py ..                                                                                           [ 60%]
+tests/test_plugin_joins.py ...                                                                                              [ 60%]
+tests/test_plugins_cte.py ..                                                                                                [ 61%]
+tests/test_predicates.py ....                                                                                               [ 62%]
+tests/test_regressions.py ..............................................................................X..........         [ 79%]
+tests/test_spacing_casing_plugin.py ...                                                                                     [ 79%]
+tests/test_split.py ......................................                                                                  [ 87%]
+tests/test_subqueries_plugin.py ..                                                                                          [ 87%]
+tests/test_tokenize.py .............................................................                                        [ 99%]
+tests/test_utils.py ....                                                                                                    [100%]
+============================================================ FAILURES =============================================================
+_________________________________________________________ test_valid_args _________________________________________________________
+filepath = <function filepath.<locals>.make_filepath at 0x6ffffeb08d30>
+    def test_valid_args(filepath):
+        # test doesn't abort
+        path = filepath('function.sql')
+>       assert sqlparse.cli.main([path, '-r']) is not None
+tests/test_cli.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+sqlparse/cli.py:252: in main
+    s = sqlparse.format(data, **formatter_opts)
+sqlparse/__init__.py:141: in format
+    result = plugin.format(result, plugin_opts)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <sqlparse.plugins.subqueries.Subqueries object at 0x6ffffeb35b20>
+sql = 'CREATE\n  OR REPLACE FUNCTION foo(p_in1 VARCHAR , p_in2 INTEGER) RETURNS INTEGER AS DECLARE v_foo INTEGER; BEGIN\nSELECT *\nFROM foo\nINTO v_foo; RETURN v_foo.id; END;'
+options = {'body_indent': 'plus_one', 'close_paren_align_with_open': True, 'comma_first': False, 'compact': False, ...}
+    def format(self, sql, options):
+        open_same = options.get('open_paren_same_line', True)
+>       body_indent = int(options.get('body_indent', 2))
+E       ValueError: invalid literal for int() with base 10: 'plus_one'
+sqlparse/plugins/subqueries.py:12: ValueError
+___________________________________________________________ test_stdout ___________________________________________________________
+filepath = <function filepath.<locals>.make_filepath at 0x6ffffeaecaf0>
+load_file = <function load_file.<locals>.make_load_file at 0x6ffffeaecd30>
+capsys = <_pytest.capture.CaptureFixture object at 0x6ffffebf3af0>
+    def test_stdout(filepath, load_file, capsys):
+        path = filepath('begintag.sql')
+        expected = load_file('begintag.sql')
+>       sqlparse.cli.main([path])
+tests/test_cli.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+sqlparse/cli.py:252: in main
+    s = sqlparse.format(data, **formatter_opts)
+sqlparse/__init__.py:141: in format
+    result = plugin.format(result, plugin_opts)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <sqlparse.plugins.subqueries.Subqueries object at 0x6ffffebb7700>, sql = 'begin;\n\n\nUPDATE foo\nSET bar = 1;\n\n\ncommit;'
+options = {'body_indent': 'plus_one', 'close_paren_align_with_open': True, 'comma_first': False, 'compact': False, ...}
+    def format(self, sql, options):
+        open_same = options.get('open_paren_same_line', True)
+>       body_indent = int(options.get('body_indent', 2))
+E       ValueError: invalid literal for int() with base 10: 'plus_one'
+sqlparse/plugins/subqueries.py:12: ValueError
+__________________________________________ test_encoding_stdout[encoding_utf8.sql-utf-8] __________________________________________
+fpath = 'encoding_utf8.sql', encoding = 'utf-8', filepath = <function filepath.<locals>.make_filepath at 0x6ffffeaeca60>
+load_file = <function load_file.<locals>.make_load_file at 0x6ffffeaecf70>
+capfd = <_pytest.capture.CaptureFixture object at 0x6ffffead34c0>
+    @pytest.mark.parametrize('fpath, encoding', (
+        ('encoding_utf8.sql', 'utf-8'),
+        ('encoding_gbk.sql', 'gbk'),
+    ))
+    def test_encoding_stdout(fpath, encoding, filepath, load_file, capfd):
+        path = filepath(fpath)
+        expected = load_file(fpath, encoding)
+>       sqlparse.cli.main([path, '--encoding', encoding])
+tests/test_cli.py:83: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+sqlparse/cli.py:252: in main
+    s = sqlparse.format(data, **formatter_opts)
+sqlparse/__init__.py:141: in format
+    result = plugin.format(result, plugin_opts)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <sqlparse.plugins.subqueries.Subqueries object at 0x6ffffea95dc0>
+sql = "SELECT *\nFROM foo\nWHERE\n  bar = '齐天大圣.カラフルな雲.사랑해요'"
+options = {'body_indent': 'plus_one', 'close_paren_align_with_open': True, 'comma_first': False, 'compact': False, ...}
+    def format(self, sql, options):
+        open_same = options.get('open_paren_same_line', True)
+>       body_indent = int(options.get('body_indent', 2))
+E       ValueError: invalid literal for int() with base 10: 'plus_one'
+sqlparse/plugins/subqueries.py:12: ValueError
+___________________________________________ test_encoding_stdout[encoding_gbk.sql-gbk] ____________________________________________
+fpath = 'encoding_gbk.sql', encoding = 'gbk', filepath = <function filepath.<locals>.make_filepath at 0x6ffffeaecaf0>
+load_file = <function load_file.<locals>.make_load_file at 0x6ffffeaecd30>
+capfd = <_pytest.capture.CaptureFixture object at 0x6ffffea7e9d0>
+    @pytest.mark.parametrize('fpath, encoding', (
+        ('encoding_utf8.sql', 'utf-8'),
+        ('encoding_gbk.sql', 'gbk'),
+    ))
+    def test_encoding_stdout(fpath, encoding, filepath, load_file, capfd):
+        path = filepath(fpath)
+        expected = load_file(fpath, encoding)
+>       sqlparse.cli.main([path, '--encoding', encoding])
+tests/test_cli.py:83: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+sqlparse/cli.py:252: in main
+    s = sqlparse.format(data, **formatter_opts)
+sqlparse/__init__.py:141: in format
+    result = plugin.format(result, plugin_opts)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <sqlparse.plugins.subqueries.Subqueries object at 0x6ffffeac0b20>, sql = "SELECT *\nFROM foo\nWHERE\n  bar = '不以物喜，不以己悲'"
+options = {'body_indent': 'plus_one', 'close_paren_align_with_open': True, 'comma_first': False, 'compact': False, ...}
+    def format(self, sql, options):
+        open_same = options.get('open_paren_same_line', True)
+>       body_indent = int(options.get('body_indent', 2))
+E       ValueError: invalid literal for int() with base 10: 'plus_one'
+sqlparse/plugins/subqueries.py:12: ValueError
+_______________________________________ test_encoding_output_file[encoding_utf8.sql-utf-8] ________________________________________
+fpath = 'encoding_utf8.sql', encoding = 'utf-8', filepath = <function filepath.<locals>.make_filepath at 0x6ffffea97280>
+load_file = <function load_file.<locals>.make_load_file at 0x6ffffea97af0>
+tmpdir = local('/tmp/pytest-of-phdyex/pytest-152/test_encoding_output_file_enco0')
+    @pytest.mark.parametrize('fpath, encoding', (
+        ('encoding_utf8.sql', 'utf-8'),
+        ('encoding_gbk.sql', 'gbk'),
+    ))
+    def test_encoding_output_file(fpath, encoding, filepath, load_file, tmpdir):
+        in_path = filepath(fpath)
+        expected = load_file(fpath, encoding)
+        out_path = tmpdir.dirname + '/encoding_out.sql'
+>       sqlparse.cli.main([in_path, '--encoding', encoding, '-o', out_path])
+tests/test_cli.py:96: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+sqlparse/cli.py:252: in main
+    s = sqlparse.format(data, **formatter_opts)
+sqlparse/__init__.py:141: in format
+    result = plugin.format(result, plugin_opts)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <sqlparse.plugins.subqueries.Subqueries object at 0x6ffffeadf640>
+sql = "SELECT *\nFROM foo\nWHERE\n  bar = '齐天大圣.カラフルな雲.사랑해요'"
+options = {'body_indent': 'plus_one', 'close_paren_align_with_open': True, 'comma_first': False, 'compact': False, ...}
+    def format(self, sql, options):
+        open_same = options.get('open_paren_same_line', True)
+>       body_indent = int(options.get('body_indent', 2))
+E       ValueError: invalid literal for int() with base 10: 'plus_one'
+sqlparse/plugins/subqueries.py:12: ValueError
+_________________________________________ test_encoding_output_file[encoding_gbk.sql-gbk] _________________________________________
+fpath = 'encoding_gbk.sql', encoding = 'gbk', filepath = <function filepath.<locals>.make_filepath at 0x6ffffea68820>
+load_file = <function load_file.<locals>.make_load_file at 0x6ffffea68940>
+tmpdir = local('/tmp/pytest-of-phdyex/pytest-152/test_encoding_output_file_enco1')
+    @pytest.mark.parametrize('fpath, encoding', (
+        ('encoding_utf8.sql', 'utf-8'),
+        ('encoding_gbk.sql', 'gbk'),
+    ))
+    def test_encoding_output_file(fpath, encoding, filepath, load_file, tmpdir):
+        in_path = filepath(fpath)
+        expected = load_file(fpath, encoding)
+        out_path = tmpdir.dirname + '/encoding_out.sql'
+>       sqlparse.cli.main([in_path, '--encoding', encoding, '-o', out_path])
+tests/test_cli.py:96: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+sqlparse/cli.py:252: in main
+    s = sqlparse.format(data, **formatter_opts)
+sqlparse/__init__.py:141: in format
+    result = plugin.format(result, plugin_opts)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <sqlparse.plugins.subqueries.Subqueries object at 0x6ffffea5b070>, sql = "SELECT *\nFROM foo\nWHERE\n  bar = '不以物喜，不以己悲'"
+options = {'body_indent': 'plus_one', 'close_paren_align_with_open': True, 'comma_first': False, 'compact': False, ...}
+    def format(self, sql, options):
+        open_same = options.get('open_paren_same_line', True)
+>       body_indent = int(options.get('body_indent', 2))
+E       ValueError: invalid literal for int() with base 10: 'plus_one'
+sqlparse/plugins/subqueries.py:12: ValueError
+__________________________________________ test_encoding_stdin[encoding_utf8.sql-utf-8] ___________________________________________
+fpath = 'encoding_utf8.sql', encoding = 'utf-8', filepath = <function filepath.<locals>.make_filepath at 0x6ffffea68c10>
+load_file = <function load_file.<locals>.make_load_file at 0x6ffffea68d30>
+capfd = <_pytest.capture.CaptureFixture object at 0x6ffffe9c1970>
+    @pytest.mark.parametrize('fpath, encoding', (
+        ('encoding_utf8.sql', 'utf-8'),
+        ('encoding_gbk.sql', 'gbk'),
+    ))
+    def test_encoding_stdin(fpath, encoding, filepath, load_file, capfd):
+        path = filepath(fpath)
+        expected = load_file(fpath, encoding)
+        old_stdin = sys.stdin
+        with open(path) as f:
+            sys.stdin = f
+>           sqlparse.cli.main(['-', '--encoding', encoding])
+tests/test_cli.py:111: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+sqlparse/cli.py:252: in main
+    s = sqlparse.format(data, **formatter_opts)
+sqlparse/__init__.py:141: in format
+    result = plugin.format(result, plugin_opts)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <sqlparse.plugins.subqueries.Subqueries object at 0x6ffffea70a00>
+sql = "SELECT *\nFROM foo\nWHERE\n  bar = '齐天大圣.カラフルな雲.사랑해요'"
+options = {'body_indent': 'plus_one', 'close_paren_align_with_open': True, 'comma_first': False, 'compact': False, ...}
+    def format(self, sql, options):
+        open_same = options.get('open_paren_same_line', True)
+>       body_indent = int(options.get('body_indent', 2))
+E       ValueError: invalid literal for int() with base 10: 'plus_one'
+sqlparse/plugins/subqueries.py:12: ValueError
+____________________________________________ test_encoding_stdin[encoding_gbk.sql-gbk] ____________________________________________
+fpath = 'encoding_gbk.sql', encoding = 'gbk', filepath = <function filepath.<locals>.make_filepath at 0x6ffffea68820>
+load_file = <function load_file.<locals>.make_load_file at 0x6ffffea68940>
+capfd = <_pytest.capture.CaptureFixture object at 0x6ffffea448e0>
+    @pytest.mark.parametrize('fpath, encoding', (
+        ('encoding_utf8.sql', 'utf-8'),
+        ('encoding_gbk.sql', 'gbk'),
+    ))
+    def test_encoding_stdin(fpath, encoding, filepath, load_file, capfd):
+        path = filepath(fpath)
+        expected = load_file(fpath, encoding)
+        old_stdin = sys.stdin
+        with open(path) as f:
+            sys.stdin = f
+>           sqlparse.cli.main(['-', '--encoding', encoding])
+tests/test_cli.py:111: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+sqlparse/cli.py:252: in main
+    s = sqlparse.format(data, **formatter_opts)
+sqlparse/__init__.py:141: in format
+    result = plugin.format(result, plugin_opts)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <sqlparse.plugins.subqueries.Subqueries object at 0x6ffffea217c0>, sql = "SELECT *\nFROM foo\nWHERE\n  bar = '不以物喜，不以己悲'"
+options = {'body_indent': 'plus_one', 'close_paren_align_with_open': True, 'comma_first': False, 'compact': False, ...}
+    def format(self, sql, options):
+        open_same = options.get('open_paren_same_line', True)
+>       body_indent = int(options.get('body_indent', 2))
+E       ValueError: invalid literal for int() with base 10: 'plus_one'
+sqlparse/plugins/subqueries.py:12: ValueError
+__________________________________________________________ test_encoding __________________________________________________________
+filepath = <function filepath.<locals>.make_filepath at 0x6ffffea28af0>
+capsys = <_pytest.capture.CaptureFixture object at 0x6ffffe9c12e0>
+    def test_encoding(filepath, capsys):
+        path = filepath('test_cp1251.sql')
+        expected = 'insert into foo values (1); -- Песня про надежду\n'
+>       sqlparse.cli.main([path, '--encoding=cp1251'])
+tests/test_cli.py:120: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+sqlparse/cli.py:252: in main
+    s = sqlparse.format(data, **formatter_opts)
+sqlparse/__init__.py:141: in format
+    result = plugin.format(result, plugin_opts)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <sqlparse.plugins.subqueries.Subqueries object at 0x6ffffea628e0>, sql = 'INSERT into foo\nvalues (1); -- Песня про надежду'
+options = {'body_indent': 'plus_one', 'close_paren_align_with_open': True, 'comma_first': False, 'compact': False, ...}
+    def format(self, sql, options):
+        open_same = options.get('open_paren_same_line', True)
+>       body_indent = int(options.get('body_indent', 2))
+E       ValueError: invalid literal for int() with base 10: 'plus_one'
+sqlparse/plugins/subqueries.py:12: ValueError
+________________________________________________________ test_style_option ________________________________________________________
+filepath = <function filepath.<locals>.make_filepath at 0x6ffffea685e0>
+load_file = <function load_file.<locals>.make_load_file at 0x6ffffea68b80>
+capsys = <_pytest.capture.CaptureFixture object at 0x6ffffead32e0>
+    def test_style_option(filepath, load_file, capsys):
+        path = filepath('begintag.sql')
+        expected = 'BEGIN;\nUPDATE foo\n       SET bar = 1;\nCOMMIT;'
+>       sqlparse.cli.main([path, '--style', 'mysql'])
+tests/test_cli.py:135: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+sqlparse/cli.py:252: in main
+    s = sqlparse.format(data, **formatter_opts)
+sqlparse/__init__.py:141: in format
+    result = plugin.format(result, plugin_opts)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <sqlparse.plugins.subqueries.Subqueries object at 0x6ffffea5b820>, sql = 'begin;\n\n\nUPDATE foo\nSET bar = 1;\n\n\ncommit;'
+options = {'body_indent': 'plus_one', 'close_paren_align_with_open': True, 'comma_first': False, 'compact': False, ...}
+    def format(self, sql, options):
+        open_same = options.get('open_paren_same_line', True)
+>       body_indent = int(options.get('body_indent', 2))
+E       ValueError: invalid literal for int() with base 10: 'plus_one'
+sqlparse/plugins/subqueries.py:12: ValueError
+======================================================== warnings summary =========================================================
+sqlparse/lexer.py:181
+  /home/phdyex/my-repos/sqlparse-3.2.5/sqlparse/lexer.py:181: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+../../../../usr/lib/python3.9/site-packages/pkg_resources/__init__.py:3142
+../../../../usr/lib/python3.9/site-packages/pkg_resources/__init__.py:3142
+  /usr/lib/python3.9/site-packages/pkg_resources/__init__.py:3142: DeprecationWarning: Deprecated call to `pkg_resources.declare_namespace('sphinxcontrib')`.
+  Implementing implicit namespace packages (as specified in PEP 420) is preferred to `pkg_resources.declare_namespace`. See https://setuptools.pypa.io/en/latest/references/keywords.html#keyword-namespace-packages
+    declare_namespace(pkg)
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+===================================================== short test summary info =====================================================
+FAILED tests/test_cli.py::test_valid_args - ValueError: invalid literal for int() with base 10: 'plus_one'
+FAILED tests/test_cli.py::test_stdout - ValueError: invalid literal for int() with base 10: 'plus_one'
+FAILED tests/test_cli.py::test_encoding_stdout[encoding_utf8.sql-utf-8] - ValueError: invalid literal for int() with base 10: 'plus_one'
+FAILED tests/test_cli.py::test_encoding_stdout[encoding_gbk.sql-gbk] - ValueError: invalid literal for int() with base 10: 'plus_one'
+FAILED tests/test_cli.py::test_encoding_output_file[encoding_utf8.sql-utf-8] - ValueError: invalid literal for int() with base 10: 'plus_one'
+FAILED tests/test_cli.py::test_encoding_output_file[encoding_gbk.sql-gbk] - ValueError: invalid literal for int() with base 10: 'plus_one'
+FAILED tests/test_cli.py::test_encoding_stdin[encoding_utf8.sql-utf-8] - ValueError: invalid literal for int() with base 10: 'plus_one'
+FAILED tests/test_cli.py::test_encoding_stdin[encoding_gbk.sql-gbk] - ValueError: invalid literal for int() with base 10: 'plus_one'
+FAILED tests/test_cli.py::test_encoding - ValueError: invalid literal for int() with base 10: 'plus_one'
+FAILED tests/test_cli.py::test_style_option - ValueError: invalid literal for int() with base 10: 'plus_one'
+================================ 10 failed, 507 passed, 2 xfailed, 1 xpassed, 3 warnings in 2.34s =================================
+Script done on 2025-08-12 06:46:07-04:00 [COMMAND_EXIT_CODE="1"]
+
