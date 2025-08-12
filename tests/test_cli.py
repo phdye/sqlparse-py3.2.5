@@ -59,7 +59,7 @@ def test_invalid_outfile(filepath, capsys):
     assert err[:22] == "[ERROR] Failed to open"
 
 
-def test_stdout(filepath, load_file, capsys):
+def test_stdout(filepath, load_file, capsys, no_config):
     path = filepath('begintag.sql')
     expected = load_file('begintag.sql')
     sqlparse.cli.main([path])
@@ -77,7 +77,7 @@ def test_script():
     ('encoding_utf8.sql', 'utf-8'),
     ('encoding_gbk.sql', 'gbk'),
 ))
-def test_encoding_stdout(fpath, encoding, filepath, load_file, capfd):
+def test_encoding_stdout(fpath, encoding, filepath, load_file, capfd, no_config):
     path = filepath(fpath)
     expected = load_file(fpath, encoding)
     sqlparse.cli.main([path, '--encoding', encoding])
@@ -89,7 +89,7 @@ def test_encoding_stdout(fpath, encoding, filepath, load_file, capfd):
     ('encoding_utf8.sql', 'utf-8'),
     ('encoding_gbk.sql', 'gbk'),
 ))
-def test_encoding_output_file(fpath, encoding, filepath, load_file, tmpdir):
+def test_encoding_output_file(fpath, encoding, filepath, load_file, tmpdir, no_config):
     in_path = filepath(fpath)
     expected = load_file(fpath, encoding)
     out_path = tmpdir.dirname + '/encoding_out.sql'
@@ -102,7 +102,7 @@ def test_encoding_output_file(fpath, encoding, filepath, load_file, tmpdir):
     ('encoding_utf8.sql', 'utf-8'),
     ('encoding_gbk.sql', 'gbk'),
 ))
-def test_encoding_stdin(fpath, encoding, filepath, load_file, capfd):
+def test_encoding_stdin(fpath, encoding, filepath, load_file, capfd, no_config):
     path = filepath(fpath)
     expected = load_file(fpath, encoding)
     old_stdin = sys.stdin
@@ -114,7 +114,7 @@ def test_encoding_stdin(fpath, encoding, filepath, load_file, capfd):
     assert out == expected
 
 
-def test_encoding(filepath, capsys):
+def test_encoding(filepath, capsys, no_config):
     path = filepath('test_cp1251.sql')
     expected = 'insert into foo values (1); -- Песня про надежду\n'
     sqlparse.cli.main([path, '--encoding=cp1251'])
@@ -129,7 +129,7 @@ def test_dump_config(filepath, capsys):
     assert 'IndentWidth: 2' in out
 
 
-def test_style_option(filepath, load_file, capsys):
+def test_style_option(filepath, load_file, capsys, no_config):
     path = filepath('begintag.sql')
     expected = 'BEGIN;\nUPDATE foo\n       SET bar = 1;\nCOMMIT;'
     sqlparse.cli.main([path, '--style', 'mysql'])
