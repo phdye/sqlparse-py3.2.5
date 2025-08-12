@@ -255,8 +255,10 @@ def build_filter_stack(stack, options):
         if fltr is not None:
             stack.postprocess.append(fltr)
 
-    # Registered plugins
+    # Registered plugins run only when explicitly enabled via options.
     for name in plugins.available_plugins():
+        if name not in options:
+            continue
         plugin_cls = plugins.get_plugin(name)
         if plugin_cls is None:
             continue

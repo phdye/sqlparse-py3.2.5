@@ -20,6 +20,32 @@ from sqlparse import plugins
 __version__ = '0.5.3'
 __all__ = ['engine', 'filters', 'formatter', 'sql', 'tokens', 'cli', 'config', 'plugins']
 
+# Mapping from option section names to plugin registry names.
+_OPTION_TO_PLUGIN = {
+    'lists': 'lists',
+    'spacing': 'spacing_casing',
+    'keywords': 'spacing_casing',
+    'identifiers': 'spacing_casing',
+    'dialect_options': 'dialect_strictness',
+    'layout': 'dialect_strictness',
+    'clauses': 'clauses',
+    'joins': 'joins',
+    'predicates': 'predicates',
+    'case_expr': 'case_expr',
+    'cte': 'cte',
+    'subqueries': 'subqueries',
+    'blocks': 'blocks',
+    'declarations': 'blocks',
+    'create_table': 'create_table',
+    'comments': 'comments',
+    'penalties': 'penalties',
+}
+
+# Mapping from plugin registry names to module names when they differ.
+_PLUGIN_MODULES = {
+    'lists': 'list_controls',
+}
+
 
 def parse(sql, encoding=None, dialect=None):
     """Parse sql and return a list of statements.
@@ -69,15 +95,33 @@ def format(sql, encoding=None, **options):
     for name in list(options.keys()):
         section = options.get(name)
         if isinstance(section, dict):
-            if plugins.get_plugin(name) is None:
-                module = _PLUGIN_MODULES.get(name, name)
+            plugin_name = _OPTION_TO_PLUGIN.get(name)
+            if plugin_name is None:
+                continue
+            if plugins.get_plugin(plugin_name) is None:
+                module = _PLUGIN_MODULES.get(plugin_name, plugin_name)
                 try:
                     __import__('sqlparse.plugins.{0}'.format(module), {}, {}, ['*'])
                 except Exception:
                     pass
-            if plugins.get_plugin(name):
-                plugin_sections[name] = section
+            if plugins.get_plugin(plugin_name):
+                if plugin_name == 'dialect_strictness':
+                    options['dialect_strictness'] = True
+                    continue
+                if plugin_name == 'spacing_casing' and name == 'keywords':
+                    if plugin_name not in plugin_sections:
+                        plugin_sections[plugin_name] = {}
+                    plugin_sections[plugin_name][name] = section
+                    continue
                 options.pop(name)
+                if plugin_name in ('lists', 'subqueries'):
+                    plugin_sections[plugin_name] = section
+                elif plugin_name == name:
+                    plugin_sections[plugin_name] = {name: section}
+                else:
+                    if plugin_name not in plugin_sections:
+                        plugin_sections[plugin_name] = {}
+                    plugin_sections[plugin_name][name] = section
 
     stack = engine.FilterStack(dialect=dialect)
     options = formatter.validate_options(options)
@@ -86,19 +130,15 @@ def format(sql, encoding=None, **options):
     stack.postprocess.append(filters.SerializerUnicode())
     result = ''.join(stack.run(sql, encoding))
 
-    for key in options:
-        if plugins.get_plugin(key) is None:
-            try:
-                __import__('sqlparse.plugins.{0}'.format(key), fromlist=['_'])
-            except Exception:
-                continue
+    run_options = options.copy()
 
-    for name in plugins.available_plugins():
-        if name in options:
-            plugin_cls = plugins.get_plugin(name)
-            if plugin_cls is not None:
-                plugin = plugin_cls()
-                result = plugin.format(result, options)
+    for name, section in plugin_sections.items():
+        plugin_opts = run_options.copy()
+        plugin_opts.update(section)
+        plugin_cls = plugins.get_plugin(name)
+        if plugin_cls is not None:
+            plugin = plugin_cls()
+            result = plugin.format(result, plugin_opts)
 
     if newline_at_eof is True:
         if not result.endswith('\n'):
