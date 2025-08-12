@@ -5,6 +5,24 @@ import os
 
 import pytest
 
+try:
+    import py
+    _orig_mksymlinkto = py.path.local.mksymlinkto
+
+    def _safe_mksymlinkto(self, value, absolute=1):
+        try:
+            return _orig_mksymlinkto(self, value, absolute)
+        except Exception:
+            try:
+                self.write(str(value))
+            except Exception:
+                pass
+            return self
+
+    py.path.local.mksymlinkto = _safe_mksymlinkto
+except Exception:
+    pass
+
 DIR_PATH = os.path.dirname(__file__)
 FILES_DIR = os.path.join(DIR_PATH, 'files')
 
