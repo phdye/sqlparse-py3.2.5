@@ -40,3 +40,10 @@ def get_plugin(name):
 def available_plugins():
     """Return an iterable of registered plugin names."""
     return _registry.keys()
+
+
+# Import bundled plugins
+try:
+    from . import dialect_strictness  # noqa: F401
+except Exception:
+    pass
