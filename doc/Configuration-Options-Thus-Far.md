@@ -92,10 +92,10 @@
 - one_column_per_line: implemented
 
 ## comments
-- reflow_block_comments: not implemented
-- keep_trailing_line_comment_with_code: not implemented
-- pragma_freeze_directives: not implemented
-- preserve_comment_position: not implemented
+- reflow_block_comments: implemented
+- keep_trailing_line_comment_with_code: implemented
+- pragma_freeze_directives: implemented
+- preserve_comment_position: implemented
 
 ## penalties
 - break_after_select: not implemented
