@@ -113,7 +113,7 @@ def validate_options(options):  # noqa: C901
     if reindent_aligned not in [True, False]:
         raise SQLParseError('Invalid value for reindent_aligned: '
                             '{!r}'.format(reindent))
-    elif reindent_aligned:
+    elif reindent_aligned and options.get('strip_whitespace') is not False:
         options['strip_whitespace'] = True
 
     pad_after_keyword = options.get('pad_after_keyword', 1)
@@ -127,6 +127,29 @@ def validate_options(options):  # noqa: C901
         raise SQLParseError('Invalid value for align_longest_keyword: '
                             '{!r}'.format(align_longest_keyword))
     options['align_longest_keyword'] = align_longest_keyword
+
+    initial_indent = options.get('initial_indent', 0)
+    try:
+        initial_indent = int(initial_indent)
+    except (TypeError, ValueError):
+        raise SQLParseError('Invalid value for initial_indent: '
+                            '{!r}'.format(initial_indent))
+    if initial_indent < 0:
+        raise SQLParseError('Invalid value for initial_indent: '
+                            '{!r}'.format(initial_indent))
+    options['initial_indent'] = initial_indent
+
+    initial_pad = options.get('initial_pad_after_keyword')
+    if initial_pad is not None:
+        try:
+            initial_pad = int(initial_pad)
+        except (TypeError, ValueError):
+            raise SQLParseError('Invalid value for initial_pad_after_keyword: '
+                                '{!r}'.format(initial_pad))
+        if initial_pad < 0:
+            raise SQLParseError('Invalid value for initial_pad_after_keyword: '
+                                '{!r}'.format(initial_pad))
+    options['initial_pad_after_keyword'] = initial_pad
 
     id_layout = options.get('id_layout', 'vertical')
     if id_layout not in ['vertical', 'single_line', 'hanging']:
@@ -258,7 +281,9 @@ def build_filter_stack(stack, options):
                 char=options['indent_char'],
                 pad_after_keyword=options.get('pad_after_keyword'),
                 align_longest_keyword=options.get('align_longest_keyword'),
-                id_layout=options.get('id_layout')))
+                id_layout=options.get('id_layout'),
+                initial_indent=options.get('initial_indent', 0),
+                initial_pad_after_keyword=options.get('initial_pad_after_keyword')))
 
     if options.get('right_margin'):
         stack.enable_grouping()
