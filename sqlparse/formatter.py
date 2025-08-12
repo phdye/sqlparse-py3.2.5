@@ -46,6 +46,24 @@ def validate_options(options):  # noqa: C901
         raise SQLParseError('Invalid value for use_space_around_operators: '
                             '{!r}'.format(space_around_operators))
 
+    spaces_in_parens = options.get('spaces_in_parens', False)
+    if spaces_in_parens not in [True, False]:
+        raise SQLParseError('Invalid value for spaces_in_parens: '
+                            '{!r}'.format(spaces_in_parens))
+    options['spaces_in_parens'] = spaces_in_parens
+
+    spaces_in_brackets = options.get('spaces_in_brackets', False)
+    if spaces_in_brackets not in [True, False]:
+        raise SQLParseError('Invalid value for spaces_in_brackets: '
+                            '{!r}'.format(spaces_in_brackets))
+    options['spaces_in_brackets'] = spaces_in_brackets
+
+    space_before_call_paren = options.get('space_before_call_paren', False)
+    if space_before_call_paren not in [True, False]:
+        raise SQLParseError('Invalid value for space_before_call_paren: '
+                            '{!r}'.format(space_before_call_paren))
+    options['space_before_call_paren'] = space_before_call_paren
+
     strip_ws = options.get('strip_whitespace', False)
     if strip_ws not in [True, False]:
         raise SQLParseError('Invalid value for strip_whitespace: '
@@ -100,6 +118,12 @@ def validate_options(options):  # noqa: C901
         options['indent_char'] = '\t'
     else:
         options['indent_char'] = ' '
+
+    newline_at_eof = options.get('newline_at_eof', None)
+    if newline_at_eof not in [None, True, False]:
+        raise SQLParseError('Invalid value for newline_at_eof: '
+                            '{!r}'.format(newline_at_eof))
+    options['newline_at_eof'] = newline_at_eof
 
     indent_width = options.get('indent_width', 2)
     try:
@@ -174,6 +198,15 @@ def build_filter_stack(stack, options):
     if options.get('strip_whitespace') or options.get('reindent'):
         stack.enable_grouping()
         stack.stmtprocess.append(filters.StripWhitespaceFilter())
+
+    if (options.get('spaces_in_parens') or options.get('spaces_in_brackets') or
+            options.get('space_before_call_paren')):
+        stack.enable_grouping()
+        stack.stmtprocess.append(
+            filters.ParenSpacingFilter(
+                spaces_in_parens=options.get('spaces_in_parens'),
+                spaces_in_brackets=options.get('spaces_in_brackets'),
+                space_before_call_paren=options.get('space_before_call_paren')))
 
     if options.get('reindent'):
         stack.enable_grouping()

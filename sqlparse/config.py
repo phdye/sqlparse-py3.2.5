@@ -20,10 +20,14 @@ DEFAULT_CONFIG = {
     'indent_columns': False,
     'reindent_aligned': False,
     'use_space_around_operators': False,
+    'spaces_in_parens': False,
+    'spaces_in_brackets': False,
+    'space_before_call_paren': False,
     'wrap_after': 0,
     'comma_first': False,
     'compact': False,
     'indent_tabs': False,
+    'newline_at_eof': None,
     'strip_whitespace': False,
     'truncate_strings': None,
     'truncate_char': '[...]',
@@ -51,6 +55,9 @@ KEY_MAP = {
     'IndentColumns': 'indent_columns',
     'ReindentAligned': 'reindent_aligned',
     'UseSpaceAroundOperators': 'use_space_around_operators',
+    'SpacesInParens': 'spaces_in_parens',
+    'SpacesInBrackets': 'spaces_in_brackets',
+    'SpaceBeforeCallParen': 'space_before_call_paren',
     'WrapAfter': 'wrap_after',
     'CommaFirst': 'comma_first',
     'Compact': 'compact',
@@ -175,32 +182,88 @@ def load_clang_config(path):
     version = data.get('version')
     if version != 1:
         raise ValueError('Unsupported config version: {0}'.format(version))
+
     opts = {}
+
+    # Dialect
     dialect = data.get('dialect')
     if isinstance(dialect, dict):
         mode = dialect.get('mode')
         if mode:
             opts['dialect'] = mode
+        other = {k: v for k, v in dialect.items() if k != 'mode'}
+        if other:
+            opts['dialect_options'] = other
+
+    # Layout options
     layout = data.get('layout')
     if isinstance(layout, dict):
         if 'indent_width' in layout:
             opts['indent_width'] = layout['indent_width']
         if 'column_limit' in layout:
             opts['wrap_after'] = layout['column_limit']
+        if 'use_tab' in layout:
+            use_tab = layout['use_tab']
+            if isinstance(use_tab, str):
+                use_tab = use_tab.lower() != 'never'
+            opts['indent_tabs'] = bool(use_tab)
+        if 'newline_at_eof' in layout:
+            opts['newline_at_eof'] = layout['newline_at_eof']
+        rem = {k: v for k, v in layout.items()
+               if k not in ('indent_width', 'column_limit', 'use_tab', 'newline_at_eof')}
+        if rem:
+            opts['layout'] = rem
+
+    # Spacing rules
     spacing = data.get('spacing')
     if isinstance(spacing, dict):
         if 'space_around_operators' in spacing:
             opts['use_space_around_operators'] = spacing['space_around_operators']
+        if 'spaces_in_parens' in spacing:
+            opts['spaces_in_parens'] = spacing['spaces_in_parens']
+        if 'spaces_in_brackets' in spacing:
+            opts['spaces_in_brackets'] = spacing['spaces_in_brackets']
+        if 'space_before_call_paren' in spacing:
+            opts['space_before_call_paren'] = spacing['space_before_call_paren']
+        rem = {k: v for k, v in spacing.items() if k not in (
+            'space_around_operators', 'spaces_in_parens',
+            'spaces_in_brackets', 'space_before_call_paren')}
+        if rem:
+            opts['spacing'] = rem
+
+    # Keyword casing
     keywords = data.get('keywords')
     if isinstance(keywords, dict):
         case = keywords.get('case')
         if case:
             opts['keyword_case'] = case.lower()
+        rem = {k: v for k, v in keywords.items() if k != 'case'}
+        if rem:
+            opts['keywords'] = rem
+
+    # Identifier casing
     identifiers = data.get('identifiers')
     if isinstance(identifiers, dict):
         case = identifiers.get('case')
         if case:
             opts['identifier_case'] = case.lower()
+        rem = {k: v for k, v in identifiers.items() if k != 'case'}
+        if rem:
+            opts['identifiers'] = rem
+
+    # Remaining top-level sections are stored verbatim so callers may
+    # access the detailed formatting instructions defined in the config
+    # file.  They currently don't map to built-in sqlparse options but
+    # are preserved to allow external tools to consume them.
+    for name in (
+        'lists', 'clauses', 'joins', 'predicates', 'case_expr', 'cte',
+        'subqueries', 'blocks', 'declarations', 'create_table',
+        'comments', 'penalties',
+    ):
+        section = data.get(name)
+        if isinstance(section, dict):
+            opts[name] = section
+
     return opts
 
 
