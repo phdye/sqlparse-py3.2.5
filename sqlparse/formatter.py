@@ -13,15 +13,23 @@ from sqlparse.exceptions import SQLParseError
 
 def validate_options(options):  # noqa: C901
     """Validates options."""
-    kwcase = options.get('keyword_case')
+    orig_kwcase = options.get('keyword_case')
+    kwcase = orig_kwcase
+    if kwcase == 'preserve':
+        kwcase = None
     if kwcase not in [None, 'upper', 'lower', 'capitalize']:
         raise SQLParseError('Invalid value for keyword_case: '
-                            '{!r}'.format(kwcase))
+                            '{!r}'.format(orig_kwcase))
+    options['keyword_case'] = kwcase
 
-    idcase = options.get('identifier_case')
+    orig_idcase = options.get('identifier_case')
+    idcase = orig_idcase
+    if idcase == 'preserve':
+        idcase = None
     if idcase not in [None, 'upper', 'lower', 'capitalize']:
         raise SQLParseError('Invalid value for identifier_case: '
-                            '{!r}'.format(idcase))
+                            '{!r}'.format(orig_idcase))
+    options['identifier_case'] = idcase
 
     ofrmt = options.get('output_format')
     if ofrmt not in [None, 'sql', 'python', 'php']:

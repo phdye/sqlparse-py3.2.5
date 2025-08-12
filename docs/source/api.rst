@@ -25,12 +25,12 @@ Formatting of SQL Statements
 The :meth:`~sqlparse.format` function accepts the following keyword arguments.
 
 ``keyword_case``
-  Changes how keywords are formatted. Allowed values are "upper", "lower"
-  and "capitalize".
+  Changes how keywords are formatted. Allowed values are "upper", "lower",
+  "capitalize", and "preserve".
 
 ``identifier_case``
   Changes how identifiers are formatted. Allowed values are "upper", "lower",
-  and "capitalize".
+  "capitalize", and "preserve".
 
 ``strip_comments``
   If ``True`` comments are removed from the statements.

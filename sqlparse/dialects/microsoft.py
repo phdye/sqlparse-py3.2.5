@@ -7,6 +7,6 @@ def initialize(lex):
 
 
 Lexer.register_dialect(
-    'microsoft', initialize, aliases=('t-sql', 'transact-sql')
+    'microsoft', initialize, aliases=('t-sql', 'transact-sql', 'tsql')
 )
 
