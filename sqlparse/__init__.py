@@ -57,6 +57,7 @@ def format(sql, encoding=None, **options):
     newline_at_eof = options.pop('newline_at_eof', None)
     stack = engine.FilterStack(dialect=dialect)
     options = formatter.validate_options(options)
+    options['dialect'] = dialect
     stack = formatter.build_filter_stack(stack, options)
     stack.postprocess.append(filters.SerializerUnicode())
     result = ''.join(stack.run(sql, encoding))
