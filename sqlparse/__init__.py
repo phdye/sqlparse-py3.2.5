@@ -54,11 +54,18 @@ def format(sql, encoding=None, **options):
     :returns: The formatted SQL statement as string.
     """
     dialect = options.pop('dialect', None)
+    newline_at_eof = options.pop('newline_at_eof', None)
     stack = engine.FilterStack(dialect=dialect)
     options = formatter.validate_options(options)
     stack = formatter.build_filter_stack(stack, options)
     stack.postprocess.append(filters.SerializerUnicode())
-    return ''.join(stack.run(sql, encoding))
+    result = ''.join(stack.run(sql, encoding))
+    if newline_at_eof is True:
+        if not result.endswith('\n'):
+            result += '\n'
+    elif newline_at_eof is False:
+        result = result.rstrip('\n')
+    return result
 
 
 def split(sql, encoding=None, dialect=None, strip_semicolon=False):

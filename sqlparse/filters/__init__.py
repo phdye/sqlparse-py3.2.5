@@ -10,6 +10,7 @@ from sqlparse.filters.others import StripCommentsFilter
 from sqlparse.filters.others import StripWhitespaceFilter
 from sqlparse.filters.others import StripTrailingSemicolonFilter
 from sqlparse.filters.others import SpacesAroundOperatorsFilter
+from sqlparse.filters.others import ParenSpacingFilter
 
 from sqlparse.filters.output import OutputPHPFilter
 from sqlparse.filters.output import OutputPythonFilter
@@ -28,6 +29,7 @@ __all__ = [
     'StripWhitespaceFilter',
     'StripTrailingSemicolonFilter',
     'SpacesAroundOperatorsFilter',
+    'ParenSpacingFilter',
 
     'OutputPHPFilter',
     'OutputPythonFilter',
