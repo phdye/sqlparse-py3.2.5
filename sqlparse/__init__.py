@@ -127,7 +127,9 @@ def format(sql, encoding=None, **options):
     options = formatter.validate_options(options)
     options['dialect'] = dialect
     stack = formatter.build_filter_stack(stack, options)
-    stack.postprocess.append(filters.SerializerUnicode())
+    stack.postprocess.append(
+        filters.SerializerUnicode(
+            strip_trailing_whitespace=options.get('strip_trailing_whitespace', True)))
     result = ''.join(stack.run(sql, encoding))
 
     run_options = options.copy()
