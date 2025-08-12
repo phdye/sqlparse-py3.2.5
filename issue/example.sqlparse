@@ -1,0 +1,120 @@
+version: 1
+
+dialect:
+  mode: oracle
+  strict_keywords: true
+
+layout:
+  column_limit: 100
+  indent_width: 2               # outer Pro*C blocks indent; SQL bodies use +2 continuation
+  continuation_indent: 2
+  use_tab: never
+  newline_at_eof: true
+
+spacing:
+  spaces_in_parens: false
+  spaces_in_brackets: false
+  space_before_call_paren: false
+  space_around_operators: true
+  compact_bool_not: true
+
+keywords:
+  case: upper                   # e.g., SELECT/INTO/FROM/WHERE are UPPER:contentReference[oaicite:0]{index=0}
+  reserved_only: true
+
+identifiers:
+  case: preserve
+  quote_style: preserve
+  keep_quoted_case: true
+
+lists:
+  bin_pack: false               # one item per line once wrapping starts
+  align_after_open_paren: true  # align wrapped list items (e.g., FETCH ... INTO list):contentReference[oaicite:1]{index=1}
+  break_after_comma: true
+  leading_commas: false
+  wrap_after: auto
+
+clauses:
+  break:
+    with:   after
+    select: after               # SELECT … then wrap items on next line(s):contentReference[oaicite:2]{index=2}
+    into:   after               # keep INTO on its own line when present:contentReference[oaicite:3]{index=3}
+    from:   after
+    where:  after               # AND/OR items broken one-per-line:contentReference[oaicite:4]{index=4}
+    group_by: after
+    having: after
+    order_by: after
+    values: after
+    join:   after
+    on:     after
+  blank_lines:
+    before_with: 0
+    before_create: 0
+    before_block: 0
+
+joins:
+  join_on_new_line: true
+  align_on_under_join: true
+
+predicates:
+  layout: one_per_line          # break boolean chains so each AND/OR starts a line:contentReference[oaicite:5]{index=5}
+
+case_expr:
+  indent_when_then: true
+  align_then: true
+  end_align_with_case: true
+
+cte:
+  one_per_line: true
+  blank_line_between: false
+  trailing_comma_style: trailing
+
+subqueries:
+  open_paren_same_line: true
+  body_indent: plus_one
+  close_paren_align_with_open: true
+  prefer_keyword_on_newline: true
+
+blocks:
+  begin_same_line: true
+  end_own_line: true
+  align_end_with_opener: true
+  label_column: 0
+
+declarations:
+  one_per_line: true
+  align_types: true
+  align_assignment: true
+
+create_table:
+  align_columns: true
+  comma_last: true
+  one_column_per_line: true
+
+comments:
+  reflow_block_comments: true
+  keep_trailing_line_comment_with_code: true
+  pragma_freeze_directives:
+    - '/* format: off */'
+    - '/* format: on */'
+    - '-- format: off'
+    - '-- format: on'
+  preserve_comment_position: true
+
+penalties:
+  break_after_select: 50
+  keep_short_select_items_together: 30
+  break_before_first_select_item: 10
+  break_before_from: 25
+  break_before_where: 25
+  break_in_boolean_chain: 5
+  over_column_limit: 1000
+
+safety:
+  no_reorder_semantics: true
+  dry_run: false
+  idempotent_check: true
+
+experimental:
+  sort_ctes: off
+  sort_columns: off
