@@ -67,25 +67,31 @@ BOOL_FALSE = ['false', 'no', 'off']
 
 
 def _parse_simple_yaml(text):
-    """Parse a very small subset of YAML into a dict."""
+    """Parse a small subset of YAML with limited nesting support."""
     data = {}
-    text = text.strip()
-    if text.startswith('{') and text.endswith('}'):
-        text = text[1:-1]
-        lines = text.split(',')
-    else:
-        lines = text.splitlines()
-    for line in lines:
-        line = line.strip()
-        if not line or line.startswith('#'):
+    stack = [data]
+    indents = [0]
+    for raw in text.splitlines():
+        if not raw.strip() or raw.lstrip().startswith('#'):
             continue
-        if line in ('---', '...'):
+        if raw.strip() in ('---', '...'):
             continue
+        indent = len(raw) - len(raw.lstrip(' '))
+        line = raw.strip()
         if ':' not in line:
             continue
         key, value = line.split(':', 1)
         key = key.strip()
         value = value.strip()
+        while indent < indents[-1]:
+            stack.pop()
+            indents.pop()
+        if value == '':
+            new_dict = {}
+            stack[-1][key] = new_dict
+            stack.append(new_dict)
+            indents.append(indent + 2)
+            continue
         if value.startswith('"') and value.endswith('"'):
             value = value[1:-1]
         elif value.startswith("'") and value.endswith("'"):
@@ -100,7 +106,7 @@ def _parse_simple_yaml(text):
                 value = int(value)
             except Exception:
                 pass
-        data[key] = value
+        stack[-1][key] = value
     return data
 
 
@@ -153,6 +159,49 @@ def _convert_keys(data):
     return result
 
 
+def load_clang_config(path):
+    """Load options from a clang-style YAML configuration."""
+    try:
+        stream = open(path, 'r')
+        try:
+            text = stream.read()
+        finally:
+            stream.close()
+    except OSError:
+        return {}
+    data = _parse_yaml(text) or {}
+    version = data.get('version')
+    if version != 1:
+        raise ValueError('Unsupported config version: {0}'.format(version))
+    opts = {}
+    dialect = data.get('dialect')
+    if isinstance(dialect, dict):
+        mode = dialect.get('mode')
+        if mode:
+            opts['dialect'] = mode
+    layout = data.get('layout')
+    if isinstance(layout, dict):
+        if 'indent_width' in layout:
+            opts['indent_width'] = layout['indent_width']
+        if 'column_limit' in layout:
+            opts['wrap_after'] = layout['column_limit']
+    spacing = data.get('spacing')
+    if isinstance(spacing, dict):
+        if 'space_around_operators' in spacing:
+            opts['use_space_around_operators'] = spacing['space_around_operators']
+    keywords = data.get('keywords')
+    if isinstance(keywords, dict):
+        case = keywords.get('case')
+        if case:
+            opts['keyword_case'] = case
+    identifiers = data.get('identifiers')
+    if isinstance(identifiers, dict):
+        case = identifiers.get('case')
+        if case:
+            opts['identifier_case'] = case
+    return opts
+
+
 def find_config(start):
     """Search for a .sqlparse file starting from *start*."""
     if start is None:
@@ -173,10 +222,9 @@ def find_config(start):
 
 def load_config(path):
     cfg = DEFAULT_CONFIG.copy()
-    if path:
-        cfg_path = find_config(path)
-        if cfg_path:
-            cfg.update(load_from_file(cfg_path))
+    cfg_path = find_config(path)
+    if cfg_path:
+        cfg.update(load_clang_config(cfg_path))
     return cfg
 
 

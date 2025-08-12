@@ -50,6 +50,12 @@ def create_parser():
         help='Formatting style (name, "file", or inline YAML)')
 
     parser.add_argument(
+        '--config',
+        dest='config',
+        metavar='FILE',
+        help='Read formatting options from YAML FILE (default ".sqlparse")')
+
+    parser.add_argument(
         '--dump-config',
         dest='dump_config',
         action='store_true',
@@ -193,7 +199,13 @@ def main(args=None):
         cfg_path = os.getcwd()
     else:
         cfg_path = args.filename
-    options = spconfig.load_config(cfg_path)
+    options = spconfig.DEFAULT_CONFIG.copy()
+    cfg_file = args.config or spconfig.find_config(cfg_path)
+    if cfg_file:
+        try:
+            options.update(spconfig.load_clang_config(cfg_file))
+        except ValueError as e:
+            return _error(str(e))
     try:
         options.update(spconfig.load_style(args.style))
     except ValueError as e:
