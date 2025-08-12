@@ -4,6 +4,7 @@ import io
 import os
 
 import pytest
+import sqlparse.config as spconfig
 
 try:
     import py
@@ -63,3 +64,8 @@ def get_stream(filepath):
         return open(filepath(filename), encoding=encoding)
 
     return make_stream
+
+
+@pytest.fixture
+def no_config(monkeypatch):
+    monkeypatch.setattr(spconfig, 'find_config', lambda start: None)
