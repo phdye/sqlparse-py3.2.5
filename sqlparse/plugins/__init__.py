@@ -42,8 +42,11 @@ def available_plugins():
     return _registry.keys()
 
 
-# Import bundled plugins
-try:
+# Import bundled plugins so that they register themselves with the registry.
+# Each plugin uses the register_plugin decorator at import time.
+try:  # pragma: no cover - import side effects are tested elsewhere
+    from . import cte  # noqa: F401
     from . import dialect_strictness  # noqa: F401
 except Exception:
-    pass
+    # If the plugin fails to import we simply skip registration to keep
+    # compatibility with minimal environments.

@@ -65,9 +65,9 @@
 - end_align_with_case: implemented
 
 ## cte
-- one_per_line: not implemented
-- blank_line_between: not implemented
-- trailing_comma_style: not implemented
+- one_per_line: implemented
+- blank_line_between: implemented
+- trailing_comma_style: implemented
 
 ## subqueries
 - open_paren_same_line: not implemented
