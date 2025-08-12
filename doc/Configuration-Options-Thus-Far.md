@@ -52,9 +52,9 @@
 - blank_lines.before_block: not implemented
 
 ## joins
-- join_on_new_line: not implemented
-- align_on_under_join: not implemented
-- prefer_explicit: not implemented
+- join_on_new_line: implemented
+- align_on_under_join: implemented
+- prefer_explicit: implemented
 
 ## predicates
 - layout: not implemented
