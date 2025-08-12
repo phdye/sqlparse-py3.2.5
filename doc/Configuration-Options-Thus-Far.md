@@ -76,15 +76,15 @@
 - prefer_keyword_on_newline: implemented
 
 ## blocks
-- begin_same_line: not implemented
-- end_own_line: not implemented
-- align_end_with_opener: not implemented
-- label_column: not implemented
+- begin_same_line: implemented
+- end_own_line: implemented
+- align_end_with_opener: implemented
+- label_column: implemented
 
 ## declarations
-- one_per_line: not implemented
-- align_types: not implemented
-- align_assignment: not implemented
+- one_per_line: implemented
+- align_types: implemented
+- align_assignment: implemented
 
 ## create_table
 - align_columns: not implemented
