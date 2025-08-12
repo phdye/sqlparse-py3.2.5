@@ -60,9 +60,9 @@
 - layout: implemented
 
 ## case_expr
-- indent_when_then: not implemented
-- align_then: not implemented
-- end_align_with_case: not implemented
+- indent_when_then: implemented
+- align_then: implemented
+- end_align_with_case: implemented
 
 ## cte
 - one_per_line: not implemented
