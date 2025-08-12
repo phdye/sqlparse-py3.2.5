@@ -64,6 +64,14 @@ def test_load_clang_config_preserve(tmpdir):
     assert opts['identifier_case'] == 'preserve'
 
 
+def test_load_clang_config_equals(tmpdir):
+    cfg = tmpdir.join('style.ini')
+    cfg.write('[sqlformat]\nversion = 1\nreindent = true\nkeyword_case = upper\n')
+    opts = config.load_clang_config(str(cfg))
+    assert opts['reindent'] is True
+    assert opts['keyword_case'] == 'upper'
+
+
 def test_load_clang_config_full_sections(tmpdir):
     cfg = tmpdir.join('style_full.yaml')
     cfg.write(

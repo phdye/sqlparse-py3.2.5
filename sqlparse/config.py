@@ -91,9 +91,12 @@ def _parse_simple_yaml(text):
             continue
         indent = len(raw) - len(raw.lstrip(' '))
         line = raw.strip()
-        if ':' not in line:
+        if ':' in line:
+            key, value = line.split(':', 1)
+        elif '=' in line:
+            key, value = line.split('=', 1)
+        else:
             continue
-        key, value = line.split(':', 1)
         key = key.strip()
         value = value.strip()
         if value:
@@ -133,7 +136,7 @@ def _parse_yaml(text):
                 return loaded
             return {}
         except Exception:
-            return {}
+            return _parse_simple_yaml(text)
     return _parse_simple_yaml(text)
 
 
@@ -190,6 +193,13 @@ def load_clang_config(path):
         raise ValueError('Unsupported config version: {0}'.format(version))
 
     opts = {}
+
+    for key in DEFAULT_CONFIG:
+        if key in data:
+            val = data[key]
+            if isinstance(val, str) and key in ('keyword_case', 'identifier_case', 'output_format'):
+                val = val.lower()
+            opts[key] = val
 
     # Dialect
     dialect = data.get('dialect')
