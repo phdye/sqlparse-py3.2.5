@@ -1,7 +1,8 @@
 # Makefile to simplify some common development tasks.
 # Run 'make help' for a list of commands.
 
-PYTHON=`which python`
+# PYTHON=`which python`
+PYTHON=python3.2
 
 default: help
 
@@ -12,8 +13,11 @@ help:
 test:
 	tox
 
+pytest:
+	$(PYTHON) -m pytest tests/
+
 coverage:
-	pytest --cov=sqlparse --cov-report=html --cov-report=term
+	$(PYTHON) -m pytest --cov=sqlparse --cov-report=html --cov-report=term
 
 clean:
 	$(PYTHON) setup.py clean
@@ -22,6 +26,6 @@ clean:
 
 release:
 	@rm -rf dist/
-	python -m build
+	$(PYTHON) -m build
 	hatch publish
 	@echo "Reminder: Add release on github https://github.com/andialbrecht/sqlparse/releases"
