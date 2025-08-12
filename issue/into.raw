@@ -1,0 +1,32 @@
+Script started on 2025-08-11 12:27:14-04:00 [TERM="screen.xterm-256color" TTY="/dev/pty7" COLUMNS="121" LINES="40"]
+[6n[6n[?9001h[?1004h[m[?25hOracle connection : OK
+[?9001l[?1004l
+ssh-agent is already running
+2048 SHA256:UZzJ9QUnS/2U8yUrvPZFqUkIEIFo961LxH+TlIM3M2A /home/phdyex/.ssh/./id_rsa (RSA)
+256 SHA256:Hbth+Z5Y2OvzGc4nUEKkypDo1Re7sNpvYm8F1EBxOTk phdyex@xps-ne (ED25519)
+3072 SHA256:U7Bpcu/EFk38MGgQfSKcc2N5uJzyfAcXCCHOtDmMgfQ phdyex@xps-ne (RSA)
+3072 SHA256:t/KgCWCnRKu1bPW6KSe39cA2+BBH2noHPKOHFgCxvs0 phdyex@xps-ne (RSA)
+3072 SHA256:Ze9hHvWp5m5Q3N6UrGwP0rnkXY7I4MaqDo9nhaSgxFg phdyex@xps-ne (RSA)
+
+[6n[?9001h[?1004h[m[?25h[?9001l[?1004l[?2004h]0;[ 6 ] ~/my-repos/sqlparse-3.2.5
+[ 6 ] [32mphdyex @ xps-ne [33m~/my-repos/sqlparse-3.2.5[0m
+$ cat into.esql
+[?2004l      EXEC SQL
+        SELECT first_name, last_name
+        INTO :firstName, :lastName
+        FROM employees
+        WHERE employee_id = :id;
+[?2004h]0;[ 6 ] ~/my-repos/sqlparse-3.2.5
+[ 6 ] [32mphdyex @ xps-ne [33m~/my-repos/sqlparse-3.2.5[0m
+$ cat into.esql | sqlformat -
+[?2004lEXEC SQL
+    SELECT first_name
+      , last_name INTO :firstName
+      , :lastName
+    FROM employees
+    WHERE employee_id = :id;[?2004h]0;[ 6 ] ~/my-repos/sqlparse-3.2.5
+[ 6 ] [32mphdyex @ xps-ne [33m~/my-repos/sqlparse-3.2.5[0m
+$ exit
+[?2004lexit
+
+Script done on 2025-08-11 12:27:34-04:00 [COMMAND_EXIT_CODE="0"]

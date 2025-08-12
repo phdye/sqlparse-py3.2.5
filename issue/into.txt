@@ -1,0 +1,30 @@
+Consider this:
+```
+[ 6 ] phdyex @ xps-ne ~/my-repos/sqlparse-3.2.5
+$ cat into.esql
+      EXEC SQL
+        SELECT first_name, last_name
+        INTO :firstName, :lastName
+        FROM employees
+        WHERE employee_id = :id;
+
+$ cat into.esql | sqlformat -
+EXEC SQL
+    SELECT first_name
+      , last_name INTO :firstName
+      , :lastName
+    FROM employees
+    WHERE employee_id = :id;
+```
+
+Whereas, I expected the INTO clause would start on it's own line:
+```
+    SELECT first_name
+      , last_name
+    INTO :firstName
+      , :lastName
+    FROM employees
+    WHERE employee_id = :id;
+```
+
+Please fix this.
