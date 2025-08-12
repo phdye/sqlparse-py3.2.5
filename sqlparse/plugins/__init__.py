@@ -52,8 +52,20 @@ def available_plugins():
 # Import bundled plugins so that they register themselves with the registry.
 # Each plugin uses the register_plugin decorator at import time.
 try:  # pragma: no cover - import side effects are tested elsewhere
+    from . import blocks  # noqa: F401
+    from . import case_expr  # noqa: F401
+    from . import clauses  # noqa: F401
+    from . import comments  # noqa: F401
     from . import cte  # noqa: F401
+    from . import create_table  # noqa: F401
     from . import dialect_strictness  # noqa: F401
+    from . import joins  # noqa: F401
+    from . import list_controls  # noqa: F401
+    from . import penalties  # noqa: F401
+    from . import predicates  # noqa: F401
+    from . import spacing_casing  # noqa: F401
+    from . import subqueries  # noqa: F401
 except Exception:
-    # If the plugin fails to import we simply skip registration to keep
+    # If a plugin fails to import we simply skip registration to keep
     # compatibility with minimal environments.
+    pass

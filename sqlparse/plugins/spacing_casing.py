@@ -1,7 +1,9 @@
 import re
 
+import sqlparse
 from sqlparse import keywords
 from sqlparse import plugins
+from sqlparse import tokens as T
 
 
 class SpacingCasing(object):
@@ -17,11 +19,36 @@ class SpacingCasing(object):
         kw_opts = options.get('keywords') or {}
         case = options.get('keyword_case')
         if case and kw_opts.get('reserved_only'):
-            pattern = r'\b(' + '|'.join(self.RESERVED) + r')\b'
-            def repl(match):
-                word = match.group(0)
-                return getattr(str, case)(word)
-            text = re.sub(pattern, repl, text, flags=re.IGNORECASE)
+            stmts = sqlparse.parse(text)
+            parts = []
+            for stmt in stmts:
+                flat = list(stmt.flatten())
+                for idx, tok in enumerate(flat):
+                    if tok.ttype in T.Keyword and tok.value.upper() in self.RESERVED:
+                        prev = None
+                        j = idx - 1
+                        while j >= 0:
+                            pt = flat[j]
+                            if not pt.is_whitespace:
+                                prev = pt
+                                break
+                            j -= 1
+                        nxt = None
+                        j = idx + 1
+                        length = len(flat)
+                        while j < length:
+                            nt = flat[j]
+                            if not nt.is_whitespace:
+                                nxt = nt
+                                break
+                            j += 1
+                        if prev and prev.match(T.Keyword, 'FROM') and nxt and nxt.ttype in T.Name:
+                            parts.append(tok.value)
+                        else:
+                            parts.append(getattr(str, case)(tok.value))
+                    else:
+                        parts.append(tok.value)
+            text = ''.join(parts)
 
         ident_opts = options.get('identifiers') or {}
         quote_style = ident_opts.get('quote_style')
