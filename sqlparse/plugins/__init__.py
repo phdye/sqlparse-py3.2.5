@@ -9,14 +9,14 @@ shared state.
 _registry = {}
 
 
-def register_plugin(name, plugin_cls):
-    """Register *plugin_cls* under *name*.
+def register_plugin(name):
+    """Return a decorator that registers *plugin_cls* under *name*."""
 
-    If a plugin with *name* already exists it will be replaced.
-    The function returns the class to allow usage as a decorator.
-    """
-    _registry[name] = plugin_cls
-    return plugin_cls
+    def _decorator(plugin_cls):
+        _registry[name] = plugin_cls
+        return plugin_cls
+
+    return _decorator
 
 
 def get_plugin(name):
@@ -30,3 +30,13 @@ def get_plugin(name):
 def available_plugins():
     """Return an iterable of registered plugin names."""
     return _registry.keys()
+
+
+# Import bundled plugins so that they register themselves with the registry.
+# Each plugin uses the register_plugin decorator at import time.
+try:  # pragma: no cover - import side effects are tested elsewhere
+    from . import cte  # noqa: F401
+except Exception:
+    # If the plugin fails to import we simply skip registration to keep
+    # compatibility with minimal environments.
+    pass
