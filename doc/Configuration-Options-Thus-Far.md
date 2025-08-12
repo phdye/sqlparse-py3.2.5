@@ -2,12 +2,12 @@
 
 ## dialect
 - mode: implemented
-- strict_keywords: not implemented
+- strict_keywords: implemented
 
 ## layout
 - column_limit: implemented
 - indent_width: implemented
-- continuation_indent: not implemented
+- continuation_indent: implemented
 - use_tab: implemented
 - newline_at_eof: implemented
 

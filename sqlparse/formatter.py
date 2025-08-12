@@ -8,7 +8,19 @@
 """SQL formatter"""
 
 from sqlparse import filters
+from sqlparse import plugins
 from sqlparse.exceptions import SQLParseError
+
+
+class _PluginFilter(object):
+    """Adapter to run formatter plugins within the filter stack."""
+
+    def __init__(self, plugin, options):
+        self._plugin = plugin
+        self._options = options
+
+    def process(self, stream):
+        return self._plugin.format(stream, self._options)
 
 
 def validate_options(options):  # noqa: C901
@@ -241,5 +253,16 @@ def build_filter_stack(stack, options):
             fltr = None
         if fltr is not None:
             stack.postprocess.append(fltr)
+
+    # Registered plugins
+    for name in plugins.available_plugins():
+        plugin_cls = plugins.get_plugin(name)
+        if plugin_cls is None:
+            continue
+        plugin = plugin_cls()
+        # Preprocess filters should run before builtins
+        stack.preprocess.insert(0, _PluginFilter(plugin, options))
+        # Postprocess filters run before serialization
+        stack.postprocess.append(_PluginFilter(plugin, options))
 
     return stack
