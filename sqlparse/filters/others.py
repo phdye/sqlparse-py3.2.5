@@ -128,6 +128,66 @@ class StripWhitespaceFilter:
         return stmt
 
 
+class ParenSpacingFilter:
+    """Apply spacing rules around parentheses, brackets and function calls."""
+
+    def __init__(self, spaces_in_parens=False, spaces_in_brackets=False,
+                 space_before_call_paren=False):
+        self.spaces_in_parens = spaces_in_parens
+        self.spaces_in_brackets = spaces_in_brackets
+        self.space_before_call_paren = space_before_call_paren
+
+    def _pad(self, group, want_space):
+        if len(group.tokens) <= 2:
+            return
+        if want_space:
+            if not group.tokens[1].is_whitespace:
+                group.tokens.insert(1, sql.Token(T.Whitespace, ' '))
+            else:
+                group.tokens[1].value = ' '
+            if not group.tokens[-2].is_whitespace:
+                group.tokens.insert(-1, sql.Token(T.Whitespace, ' '))
+            else:
+                group.tokens[-2].value = ' '
+        else:
+            while len(group.tokens) > 2 and group.tokens[1].is_whitespace:
+                group.tokens.pop(1)
+            while len(group.tokens) > 2 and group.tokens[-2].is_whitespace:
+                group.tokens.pop(-2)
+
+    def _process(self, tlist):
+        for token in list(tlist.tokens):
+            if token.is_group:
+                self._process(token)
+            elif self.spaces_in_brackets:
+                val = token.value
+                if isinstance(val, str) and val.startswith('[') and val.endswith(']'):
+                    inner = val[1:-1].strip()
+                    if self.spaces_in_brackets:
+                        token.value = '[ ' + inner + ' ]'
+                    else:
+                        token.value = '[' + inner + ']'
+
+        if self.space_before_call_paren and isinstance(tlist, sql.Function):
+            res = tlist.token_next_by(i=sql.Parenthesis)
+            if res:
+                idx = tlist.token_index(res[1])
+                prev_ = tlist.tokens[idx - 1]
+                if not prev_.is_whitespace:
+                    tlist.insert_before(idx, sql.Token(T.Whitespace, ' '))
+                else:
+                    prev_.value = ' '
+
+        if isinstance(tlist, sql.Parenthesis):
+            self._pad(tlist, self.spaces_in_parens)
+        elif isinstance(tlist, sql.SquareBrackets):
+            self._pad(tlist, self.spaces_in_brackets)
+
+    def process(self, stmt):
+        self._process(stmt)
+        return stmt
+
+
 class SpacesAroundOperatorsFilter:
     @staticmethod
     def _process(tlist):

@@ -20,6 +20,9 @@ DEFAULT_CONFIG = {
     'indent_columns': False,
     'reindent_aligned': False,
     'use_space_around_operators': False,
+    'spaces_in_parens': False,
+    'spaces_in_brackets': False,
+    'space_before_call_paren': False,
     'wrap_after': 0,
     'comma_first': False,
     'compact': False,
@@ -52,6 +55,9 @@ KEY_MAP = {
     'IndentColumns': 'indent_columns',
     'ReindentAligned': 'reindent_aligned',
     'UseSpaceAroundOperators': 'use_space_around_operators',
+    'SpacesInParens': 'spaces_in_parens',
+    'SpacesInBrackets': 'spaces_in_brackets',
+    'SpaceBeforeCallParen': 'space_before_call_paren',
     'WrapAfter': 'wrap_after',
     'CommaFirst': 'comma_first',
     'Compact': 'compact',
@@ -213,7 +219,15 @@ def load_clang_config(path):
     if isinstance(spacing, dict):
         if 'space_around_operators' in spacing:
             opts['use_space_around_operators'] = spacing['space_around_operators']
-        rem = {k: v for k, v in spacing.items() if k != 'space_around_operators'}
+        if 'spaces_in_parens' in spacing:
+            opts['spaces_in_parens'] = spacing['spaces_in_parens']
+        if 'spaces_in_brackets' in spacing:
+            opts['spaces_in_brackets'] = spacing['spaces_in_brackets']
+        if 'space_before_call_paren' in spacing:
+            opts['space_before_call_paren'] = spacing['space_before_call_paren']
+        rem = {k: v for k, v in spacing.items() if k not in (
+            'space_around_operators', 'spaces_in_parens',
+            'spaces_in_brackets', 'space_before_call_paren')}
         if rem:
             opts['spacing'] = rem
 

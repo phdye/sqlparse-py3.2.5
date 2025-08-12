@@ -108,7 +108,7 @@ def test_load_clang_config_full_sections(tmpdir):
     opts = config.load_clang_config(str(cfg))
     assert opts['indent_width'] == 4
     assert opts['indent_tabs'] is True
-    assert opts['spacing']['spaces_in_parens'] is True
+    assert opts['spaces_in_parens'] is True
     assert opts['keyword_case'] == 'upper'
     assert opts['keywords']['reserved_only'] is True
     assert opts['identifier_case'] == 'lower'
