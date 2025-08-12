@@ -98,12 +98,12 @@
 - preserve_comment_position: not implemented
 
 ## penalties
-- break_after_select: not implemented
-- keep_short_select_items_together: not implemented
-- break_before_first_select_item: not implemented
-- break_before_from: not implemented
-- break_before_where: not implemented
-- break_in_boolean_chain: not implemented
+- break_after_select: implemented
+- keep_short_select_items_together: implemented
+- break_before_first_select_item: implemented
+- break_before_from: implemented
+- break_before_where: implemented
+- break_in_boolean_chain: implemented
 - over_column_limit: not implemented
 
 ## safety
