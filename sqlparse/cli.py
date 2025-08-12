@@ -32,7 +32,7 @@ from sqlparse.exceptions import SQLParseError
 # TODO: Add CLI Tests
 # TODO: Simplify formatter by using argparse `type` arguments
 def create_parser():
-    _CASE_CHOICES = ['upper', 'lower', 'capitalize']
+    _CASE_CHOICES = ['upper', 'lower', 'capitalize', 'preserve']
 
     parser = argparse.ArgumentParser(
         prog='sqlformat',

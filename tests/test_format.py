@@ -14,6 +14,11 @@ class TestFormat:
         res = sqlparse.format(sql.upper(), keyword_case='lower')
         assert res == 'select * from BAR; -- SELECT FOO\n'
 
+    def test_keywordcase_preserve(self):
+        sql = 'select Foo from bar'
+        res = sqlparse.format(sql, keyword_case='preserve')
+        assert res == sql
+
     def test_keywordcase_invalid_option(self):
         sql = 'select * from bar; -- select foo\n'
         with pytest.raises(SQLParseError):
@@ -27,6 +32,11 @@ class TestFormat:
         assert res == 'select * from Bar; -- select foo\n'
         res = sqlparse.format(sql.upper(), identifier_case='lower')
         assert res == 'SELECT * FROM bar; -- SELECT FOO\n'
+
+    def test_identifiercase_preserve(self):
+        sql = 'select Foo from bar'
+        res = sqlparse.format(sql, identifier_case='preserve')
+        assert res == sql
 
     def test_identifiercase_invalid_option(self):
         sql = 'select * from bar; -- select foo\n'

@@ -38,3 +38,20 @@ def test_load_clang_config(tmpdir):
     opts = config.load_clang_config(str(cfg))
     assert opts['indent_width'] == 3
     assert opts['keyword_case'] == 'lower'
+
+
+def test_load_config_preserve(tmpdir):
+    cfg_dir = tmpdir.mkdir('cfg_preserve')
+    cfg_file = cfg_dir.join('.sqlparse')
+    cfg_file.write('version: 1\nkeywords:\n  case: preserve\nidentifiers:\n  case: preserve\n')
+    options = config.load_config(str(cfg_dir))
+    assert options['keyword_case'] == 'preserve'
+    assert options['identifier_case'] == 'preserve'
+
+
+def test_load_clang_config_preserve(tmpdir):
+    cfg = tmpdir.join('style_preserve.yaml')
+    cfg.write('version: 1\nkeywords:\n  case: preserve\nidentifiers:\n  case: preserve\n')
+    opts = config.load_clang_config(str(cfg))
+    assert opts['keyword_case'] == 'preserve'
+    assert opts['identifier_case'] == 'preserve'

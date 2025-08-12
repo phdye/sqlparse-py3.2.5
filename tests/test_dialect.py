@@ -8,3 +8,11 @@ def test_ansi_vs_postgres_keyword():
     assert tokens_ansi[0][0] is T.Name
     tokens_pg = list(lexer.tokenize(sql, dialect='postgres'))
     assert tokens_pg[0][0] is T.Keyword
+
+
+def test_tsql_alias():
+    sql = 'DISTINCTROW'
+    tokens_ansi = list(lexer.tokenize(sql, dialect='ansi'))
+    assert tokens_ansi[0][0] is T.Name
+    tokens_tsql = list(lexer.tokenize(sql, dialect='tsql'))
+    assert tokens_tsql[0][0] is T.Keyword

@@ -195,12 +195,12 @@ def load_clang_config(path):
     if isinstance(keywords, dict):
         case = keywords.get('case')
         if case:
-            opts['keyword_case'] = case
+            opts['keyword_case'] = case.lower()
     identifiers = data.get('identifiers')
     if isinstance(identifiers, dict):
         case = identifiers.get('case')
         if case:
-            opts['identifier_case'] = case
+            opts['identifier_case'] = case.lower()
     return opts
 
 
