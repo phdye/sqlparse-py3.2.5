@@ -40,6 +40,13 @@ def test_load_clang_config(tmpdir):
     assert opts['keyword_case'] == 'lower'
 
 
+def test_load_clang_config_newline_at_eof(tmpdir):
+    cfg = tmpdir.join('newline.yaml')
+    cfg.write('version: 1\nlayout:\n  newline_at_eof: true\n')
+    opts = config.load_clang_config(str(cfg))
+    assert opts['newline_at_eof'] is True
+
+
 def test_load_config_preserve(tmpdir):
     cfg_dir = tmpdir.mkdir('cfg_preserve')
     cfg_file = cfg_dir.join('.sqlparse')

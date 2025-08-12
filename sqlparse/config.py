@@ -24,6 +24,7 @@ DEFAULT_CONFIG = {
     'comma_first': False,
     'compact': False,
     'indent_tabs': False,
+    'newline_at_eof': None,
     'strip_whitespace': False,
     'truncate_strings': None,
     'truncate_char': '[...]',

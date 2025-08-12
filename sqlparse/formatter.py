@@ -101,6 +101,12 @@ def validate_options(options):  # noqa: C901
     else:
         options['indent_char'] = ' '
 
+    newline_at_eof = options.get('newline_at_eof', None)
+    if newline_at_eof not in [None, True, False]:
+        raise SQLParseError('Invalid value for newline_at_eof: '
+                            '{!r}'.format(newline_at_eof))
+    options['newline_at_eof'] = newline_at_eof
+
     indent_width = options.get('indent_width', 2)
     try:
         indent_width = int(indent_width)
