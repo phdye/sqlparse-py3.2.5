@@ -15,6 +15,11 @@ from sqlparse import tokens
 from sqlparse import filters
 from sqlparse import formatter
 from sqlparse import config
+from sqlparse import plugins
+
+_PLUGIN_MODULES = {
+    'lists': 'list_controls',
+}
 
 
 __version__ = '0.5.3'
@@ -55,6 +60,30 @@ def format(sql, encoding=None, **options):
     """
     dialect = options.pop('dialect', None)
     newline_at_eof = options.pop('newline_at_eof', None)
+
+    # Extract plugin specific sections.  "lists" requires a mapping to existing
+    # formatter options before handing control over to the plugin.
+    lists_opts = options.get('lists')
+    if isinstance(lists_opts, dict):
+        if 'wrap_after' in lists_opts and 'wrap_after' not in options:
+            options['wrap_after'] = lists_opts['wrap_after']
+        if 'leading_commas' in lists_opts and 'comma_first' not in options:
+            options['comma_first'] = lists_opts['leading_commas']
+
+    plugin_sections = {}
+    for name in list(options.keys()):
+        section = options.get(name)
+        if isinstance(section, dict):
+            if plugins.get_plugin(name) is None:
+                module = _PLUGIN_MODULES.get(name, name)
+                try:
+                    __import__('sqlparse.plugins.{0}'.format(module), {}, {}, ['*'])
+                except Exception:
+                    pass
+            if plugins.get_plugin(name):
+                plugin_sections[name] = section
+                options.pop(name)
+
     stack = engine.FilterStack(dialect=dialect)
     options = formatter.validate_options(options)
     options['dialect'] = dialect
@@ -62,28 +91,11 @@ def format(sql, encoding=None, **options):
     stack.postprocess.append(filters.SerializerUnicode())
     result = ''.join(stack.run(sql, encoding))
 
-    # Run formatter plugins if needed. Plugins are loaded lazily so the
-    # registry stays lightweight when no plugin options are supplied.
-    run_plugin = False
-    if options.get('spacing'):
-        run_plugin = True
-    elif options.get('keywords', {}).get('reserved_only'):
-        run_plugin = True
-    elif options.get('identifiers', {}).get('quote_style'):
-        run_plugin = True
-    elif options.get('identifiers', {}).get('keep_quoted_case') is False:
-        run_plugin = True
+    for name, plugin_opts in plugin_sections.items():
+        plugin_cls = plugins.get_plugin(name)
+        if plugin_cls is not None:
+            result = plugin_cls().format(result, plugin_opts)
 
-    if run_plugin:
-        from sqlparse import plugins as _plugins
-        try:
-            __import__('sqlparse.plugins.spacing_casing')
-        except Exception:
-            _plugins = None
-        if _plugins is not None:
-            plugin_cls = _plugins.get_plugin('spacing_casing')
-            if plugin_cls is not None:
-                result = plugin_cls().format(result, options)
     if newline_at_eof is True:
         if not result.endswith('\n'):
             result += '\n'

@@ -28,12 +28,12 @@
 - keep_quoted_case: not implemented
 
 ## lists
-- bin_pack: not implemented
-- align_after_open_paren: not implemented
-- break_after_comma: not implemented
-- leading_commas: not implemented
-- trailing_comma_in_select: not implemented
-- wrap_after: not implemented
+- bin_pack: implemented
+- align_after_open_paren: implemented
+- break_after_comma: implemented
+- leading_commas: implemented
+- trailing_comma_in_select: implemented
+- wrap_after: implemented
 
 ## clauses
 - break.select: implemented
