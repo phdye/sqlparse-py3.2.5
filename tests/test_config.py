@@ -55,3 +55,66 @@ def test_load_clang_config_preserve(tmpdir):
     opts = config.load_clang_config(str(cfg))
     assert opts['keyword_case'] == 'preserve'
     assert opts['identifier_case'] == 'preserve'
+
+
+def test_load_clang_config_full_sections(tmpdir):
+    cfg = tmpdir.join('style_full.yaml')
+    cfg.write(
+        'version: 1\n'
+        'layout:\n'
+        '  indent_width: 4\n'
+        '  use_tab: always\n'
+        'spacing:\n'
+        '  spaces_in_parens: true\n'
+        'keywords:\n'
+        '  case: upper\n'
+        '  reserved_only: true\n'
+        'identifiers:\n'
+        '  case: lower\n'
+        '  quote_style: single\n'
+        'lists:\n'
+        '  bin_pack: true\n'
+        'clauses:\n'
+        '  break:\n'
+        '    select: before\n'
+        'joins:\n'
+        '  join_on_new_line: true\n'
+        'predicates:\n'
+        '  layout: compact\n'
+        'case_expr:\n'
+        '  indent_when_then: false\n'
+        'cte:\n'
+        '  one_per_line: false\n'
+        'subqueries:\n'
+        '  open_paren_same_line: false\n'
+        'blocks:\n'
+        '  begin_same_line: false\n'
+        'declarations:\n'
+        '  one_per_line: true\n'
+        'create_table:\n'
+        '  align_columns: false\n'
+        'comments:\n'
+        '  preserve_comment_position: true\n'
+        'penalties:\n'
+        '  over_column_limit: 500\n'
+    )
+    opts = config.load_clang_config(str(cfg))
+    assert opts['indent_width'] == 4
+    assert opts['indent_tabs'] is True
+    assert opts['spacing']['spaces_in_parens'] is True
+    assert opts['keyword_case'] == 'upper'
+    assert opts['keywords']['reserved_only'] is True
+    assert opts['identifier_case'] == 'lower'
+    assert opts['identifiers']['quote_style'] == 'single'
+    assert opts['lists']['bin_pack'] is True
+    assert opts['clauses']['break']['select'] == 'before'
+    assert opts['joins']['join_on_new_line'] is True
+    assert opts['predicates']['layout'] == 'compact'
+    assert opts['case_expr']['indent_when_then'] is False
+    assert opts['cte']['one_per_line'] is False
+    assert opts['subqueries']['open_paren_same_line'] is False
+    assert opts['blocks']['begin_same_line'] is False
+    assert opts['declarations']['one_per_line'] is True
+    assert opts['create_table']['align_columns'] is False
+    assert opts['comments']['preserve_comment_position'] is True
+    assert opts['penalties']['over_column_limit'] == 500
