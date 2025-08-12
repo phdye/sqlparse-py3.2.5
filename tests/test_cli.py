@@ -135,3 +135,23 @@ def test_style_option(filepath, load_file, capsys):
     sqlparse.cli.main([path, '--style', 'mysql'])
     out, _ = capsys.readouterr()
     assert out == expected
+
+
+def test_config_option(tmpdir, capsys):
+    sqlfile = tmpdir.join('in.sql')
+    sqlfile.write('select 1+2 as x;')
+    cfg = tmpdir.join('style.yaml')
+    cfg.write('version: 1\nkeywords:\n  case: upper\nspacing:\n  space_around_operators: true\n')
+    sqlparse.cli.main([str(sqlfile), '--config', str(cfg)])
+    out, _ = capsys.readouterr()
+    assert out.strip() == 'SELECT 1 + 2 AS x;'
+
+
+def test_default_config(tmpdir, capsys):
+    sqlfile = tmpdir.join('in.sql')
+    sqlfile.write('select 1+2 as x;')
+    cfg = tmpdir.join('.sqlparse')
+    cfg.write('version: 1\nkeywords:\n  case: upper\nspacing:\n  space_around_operators: true\n')
+    sqlparse.cli.main([str(sqlfile)])
+    out, _ = capsys.readouterr()
+    assert out.strip() == 'SELECT 1 + 2 AS x;'
