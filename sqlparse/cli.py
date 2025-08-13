@@ -63,6 +63,13 @@ def create_parser():
         help='Dump configuration and exit')
 
     parser.add_argument(
+        '-v', '--verbose',
+        dest='verbose',
+        action='count',
+        default=0,
+        help='increase verbosity (can be repeated)')
+
+    parser.add_argument(
         '-o', '--outfile',
         dest='outfile',
         metavar='FILE',
@@ -195,23 +202,44 @@ def _error(msg):
 def main(args=None):
     parser = create_parser()
     args = parser.parse_args(args)
+    sqlparse.verbosity = getattr(args, 'verbose', 0)
+
     if args.filename == '-':
         start = os.getcwd()
     else:
         start = args.filename
+
+    cfg_path = args.config if args.config else spconfig.find_config(start)
     try:
-        options = spconfig.load_config(start, cfg_path=args.config)
+        options = spconfig.load_config(start, cfg_path=cfg_path)
     except ValueError as e:
         return _error(str(e))
+    if sqlparse.verbosity >= 1:
+        if cfg_path:
+            sys.stderr.write('[INFO] Loaded configuration from {0}\n'.format(cfg_path))
+        else:
+            sys.stderr.write('[INFO] Using default configuration\n')
+
     try:
-        options.update(spconfig.load_style(args.style))
+        style_opts = spconfig.load_style(args.style)
     except ValueError as e:
         return _error(str(e))
+    if sqlparse.verbosity >= 1:
+        if args.style:
+            if args.style.startswith('{') and args.style.endswith('}'):
+                sys.stderr.write('[INFO] Loaded style from inline definition\n')
+            else:
+                sys.stderr.write('[INFO] Loaded style {0}\n'.format(args.style))
+        else:
+            sys.stderr.write('[INFO] No style specified\n')
+    options.update(style_opts)
 
     arg_dict = vars(args)
     for key in spconfig.DEFAULT_CONFIG.keys():
         if key in arg_dict and arg_dict[key] is not None:
             options[key] = arg_dict[key]
+    if sqlparse.verbosity >= 1:
+        sys.stderr.write('[INFO] Loaded command line options\n')
 
     if args.dump_config:
         sys.stdout.write(spconfig.dump_config(options))

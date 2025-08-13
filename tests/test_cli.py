@@ -155,3 +155,34 @@ def test_default_config(tmpdir, capsys):
     sqlparse.cli.main([str(sqlfile)])
     out, _ = capsys.readouterr()
     assert out.strip() == 'SELECT 1 + 2 AS x;'
+
+
+def test_verbose_level(filepath, capsys, no_config):
+    path = filepath('function.sql')
+    sqlparse.verbosity = 0
+    sqlparse.cli.main([path, '-v'])
+    assert sqlparse.verbosity == 1
+    _, err = capsys.readouterr()
+    assert '[INFO] Using default configuration' in err
+    sqlparse.verbosity = 0
+
+
+def test_verbose_config_source(tmpdir, capsys):
+    sqlfile = tmpdir.join('in.sql')
+    sqlfile.write('select 1;')
+    cfg = tmpdir.join('.sqlparse')
+    cfg.write('version: 1\n')
+    sqlparse.verbosity = 0
+    sqlparse.cli.main([str(sqlfile), '-v'])
+    _, err = capsys.readouterr()
+    assert str(cfg) in err
+    sqlparse.verbosity = 0
+
+
+def test_verbose_style(filepath, capsys, no_config):
+    path = filepath('function.sql')
+    sqlparse.verbosity = 0
+    sqlparse.cli.main([path, '-v', '--style', 'mysql'])
+    _, err = capsys.readouterr()
+    assert '[INFO] Loaded style mysql' in err
+    sqlparse.verbosity = 0

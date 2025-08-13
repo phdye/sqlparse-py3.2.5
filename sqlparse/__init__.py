@@ -7,6 +7,9 @@
 
 """Parse SQL statements."""
 
+# Verbosity level for sqlparse, 0 by default. Higher values increase output.
+verbosity = 0
+
 # Setup namespace
 from sqlparse import sql
 from sqlparse import cli
@@ -18,7 +21,7 @@ from sqlparse import config
 from sqlparse import plugins
 
 __version__ = '0.5.3'
-__all__ = ['engine', 'filters', 'formatter', 'sql', 'tokens', 'cli', 'config', 'plugins']
+__all__ = ['engine', 'filters', 'formatter', 'sql', 'tokens', 'cli', 'config', 'plugins', 'verbosity']
 
 # Mapping from option section names to plugin registry names.
 _OPTION_TO_PLUGIN = {
