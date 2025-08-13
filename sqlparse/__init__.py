@@ -10,6 +10,8 @@
 # Verbosity level for sqlparse, 0 by default. Higher values increase output.
 verbosity = 0
 
+import sys
+
 # Setup namespace
 from sqlparse import sql
 from sqlparse import cli
@@ -21,7 +23,8 @@ from sqlparse import config
 from sqlparse import plugins
 
 __version__ = '0.5.3'
-__all__ = ['engine', 'filters', 'formatter', 'sql', 'tokens', 'cli', 'config', 'plugins', 'verbosity']
+__all__ = ['engine', 'filters', 'formatter', 'sql', 'tokens', 'cli', 'config', 'plugins', 'verbosity',
+           'get_config']
 
 # Mapping from option section names to plugin registry names.
 _OPTION_TO_PLUGIN = {
@@ -50,23 +53,61 @@ _PLUGIN_MODULES = {
 }
 
 
-def parse(sql, encoding=None, dialect=None):
+def get_config(path=None, cfg_path=None, style=None, include_defaults=True, **options):
+    if cfg_path is None:
+        cfg_path = config.find_config(path)
+    if include_defaults:
+        cfg = config.load_config(path, cfg_path=cfg_path)
+    else:
+        cfg = {}
+        if cfg_path:
+            cfg.update(config.load_clang_config(cfg_path))
+    if verbosity >= 1:
+        if cfg_path:
+            sys.stderr.write('[INFO] Loaded configuration from {0}\n'.format(cfg_path))
+        else:
+            sys.stderr.write('[INFO] Using default configuration\n')
+    try:
+        style_opts = config.load_style(style)
+    except ValueError:
+        raise
+    if verbosity >= 1:
+        if style:
+            if style.startswith('{') and style.endswith('}'):
+                sys.stderr.write('[INFO] Loaded style from inline definition\n')
+            else:
+                sys.stderr.write('[INFO] Loaded style {0}\n'.format(style))
+        else:
+            sys.stderr.write('[INFO] No style specified\n')
+    cfg.update(style_opts)
+    if options:
+        cfg.update(options)
+        if verbosity >= 1:
+            sys.stderr.write('[INFO] Loaded command line options\n')
+    return cfg
+
+
+def parse(sql, encoding=None, dialect=None, **kwargs):
     """Parse sql and return a list of statements.
 
     :param sql: A string containing one or more SQL statements.
     :param encoding: The encoding of the statement (optional).
     :returns: A tuple of :class:`~sqlparse.sql.Statement` instances.
     """
-    return tuple(parsestream(sql, encoding, dialect))
+    if dialect is None:
+        dialect = get_config(include_defaults=False, **kwargs).get('dialect')
+    return tuple(parsestream(sql, encoding, dialect, **kwargs))
 
 
-def parsestream(stream, encoding=None, dialect=None):
+def parsestream(stream, encoding=None, dialect=None, **kwargs):
     """Parses sql statements from file-like object.
 
     :param stream: A file-like object.
     :param encoding: The encoding of the stream contents (optional).
     :returns: A generator of :class:`~sqlparse.sql.Statement` instances.
     """
+    if dialect is None:
+        dialect = get_config(include_defaults=False, **kwargs).get('dialect')
     stack = engine.FilterStack(dialect=dialect)
     stack.enable_grouping()
     return stack.run(stream, encoding)
@@ -82,6 +123,10 @@ def format(sql, encoding=None, **options):
 
     :returns: The formatted SQL statement as string.
     """
+    path = options.pop('path', None)
+    cfg_path = options.pop('cfg_path', None)
+    style = options.pop('style', None)
+    options = get_config(path=path, cfg_path=cfg_path, style=style, include_defaults=False, **options)
     dialect = options.pop('dialect', None)
     newline_at_eof = options.pop('newline_at_eof', None)
 
@@ -153,7 +198,7 @@ def format(sql, encoding=None, **options):
     return result
 
 
-def split(sql, encoding=None, dialect=None, strip_semicolon=False):
+def split(sql, encoding=None, dialect=None, strip_semicolon=False, **kwargs):
     """Split *sql* into single statements.
 
     :param sql: A string containing one or more SQL statements.
@@ -162,5 +207,7 @@ def split(sql, encoding=None, dialect=None, strip_semicolon=False):
         (default: False).
     :returns: A list of strings.
     """
+    if dialect is None:
+        dialect = get_config(include_defaults=False, **kwargs).get('dialect')
     stack = engine.FilterStack(dialect=dialect, strip_semicolon=strip_semicolon)
     return [str(stmt).strip() for stmt in stack.run(sql, encoding)]
