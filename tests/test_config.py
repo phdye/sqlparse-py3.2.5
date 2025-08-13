@@ -16,6 +16,13 @@ def test_load_config(tmpdir):
     assert options['keyword_case'] == 'upper'
 
 
+def test_load_config_file(tmpdir):
+    cfg = tmpdir.join('style.yaml')
+    cfg.write('version: 1\nkeywords:\n  case: lower\n')
+    options = config.load_config(None, str(cfg))
+    assert options['keyword_case'] == 'lower'
+
+
 def test_load_config_ignores_comments(tmpdir, monkeypatch):
     monkeypatch.setattr(config, 'yaml', None)
     cfg_dir = tmpdir.mkdir('cfg_comment')

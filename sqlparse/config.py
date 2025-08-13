@@ -313,9 +313,16 @@ def find_config(start):
     return None
 
 
-def load_config(path):
+def load_config(path, cfg_path=None):
+    """Load options from *cfg_path* or search starting at *path*.
+
+    If *cfg_path* is provided it is used directly as configuration file.
+    Otherwise :func:`find_config` is used to locate a ``.sqlparse`` file
+    beginning at *path*.
+    """
     cfg = DEFAULT_CONFIG.copy()
-    cfg_path = find_config(path)
+    if cfg_path is None:
+        cfg_path = find_config(path)
     if cfg_path:
         cfg.update(load_clang_config(cfg_path))
     return cfg
