@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+# Ensure we are in a git repo
+if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    echo "Not inside a Git repository"
+    exit 1
+fi
+
+# Get the current branch name
+current_branch=$(git rev-parse --abbrev-ref HEAD)
+
+# Check if branch 3.2.5 exists locally or remotely
+branch_exists() {
+    git show-ref --verify --quiet refs/heads/3.2.5 || \
+    git show-ref --verify --quiet refs/remotes/origin/3.2.5
+}
+
+# Check ancestry
+if branch_exists && git merge-base --is-ancestor 3.2.5 "$current_branch"; then
+    echo "You are already on branch 3.2.5 or a descendant of it."
+else
+    echo "Checking out 3.2.5 from origin"
+    # Fetch and checkout 3.2.5
+    git fetch origin
+    git checkout -b 3.2.5 origin/3.2.5
+fi
