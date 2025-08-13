@@ -53,7 +53,7 @@ def create_parser():
         '--config',
         dest='config',
         metavar='FILE',
-        help='Read formatting options from YAML FILE (default ".sqlparse")')
+        help='Read formatting options from YAML FILE (default ".sqlparse-format")')
 
     parser.add_argument(
         '--dump-config',

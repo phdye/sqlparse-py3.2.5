@@ -288,7 +288,7 @@ def load_clang_config(path):
 
 
 def find_config(start):
-    """Search for a .sqlparse file starting from *start*.
+    """Search for a .sqlparse-format file starting from *start*.
 
     The search walks up the directory tree until the root directory is
     reached.  If no configuration file is found, the user's home directory is
@@ -300,14 +300,14 @@ def find_config(start):
         start = os.path.dirname(start)
     current = os.path.abspath(start)
     while True:
-        candidate = os.path.join(current, '.sqlparse')
+        candidate = os.path.join(current, '.sqlparse-format')
         if os.path.isfile(candidate):
             return candidate
         parent = os.path.dirname(current)
         if parent == current:
             break
         current = parent
-    home_candidate = os.path.join(os.path.expanduser('~'), '.sqlparse')
+    home_candidate = os.path.join(os.path.expanduser('~'), '.sqlparse-format')
     if os.path.isfile(home_candidate):
         return home_candidate
     return None
@@ -317,7 +317,7 @@ def load_config(path, cfg_path=None):
     """Load options from *cfg_path* or search starting at *path*.
 
     If *cfg_path* is provided it is used directly as configuration file.
-    Otherwise :func:`find_config` is used to locate a ``.sqlparse`` file
+    Otherwise :func:`find_config` is used to locate a ``.sqlparse-format`` file
     beginning at *path*.
     """
     cfg = DEFAULT_CONFIG.copy()
