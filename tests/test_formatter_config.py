@@ -2,7 +2,7 @@ import sqlparse
 from sqlparse import config
 
 def test_format_applies_clang_config(tmpdir):
-    cfg = tmpdir.join('.sqlparse')
+    cfg = tmpdir.join('.sqlparse-format')
     cfg.write(
         'version: 1\n'
         'dialect:\n  mode: postgres\n'

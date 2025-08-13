@@ -12,7 +12,7 @@ def test_load_style():
 
 def test_load_config(tmpdir):
     cfg_dir = tmpdir.mkdir('cfg')
-    cfg_file = cfg_dir.join('.sqlparse')
+    cfg_file = cfg_dir.join('.sqlparse-format')
     cfg_file.write('version: 1\nkeywords:\n  case: upper\n')
     options = config.load_config(str(cfg_dir))
     assert options['keyword_case'] == 'upper'
@@ -28,7 +28,7 @@ def test_load_config_file(tmpdir):
 def test_load_config_ignores_comments(tmpdir, monkeypatch):
     monkeypatch.setattr(config, 'yaml', None)
     cfg_dir = tmpdir.mkdir('cfg_comment')
-    cfg_file = cfg_dir.join('.sqlparse')
+    cfg_file = cfg_dir.join('.sqlparse-format')
     cfg_file.write('version: 1\nkeywords:\n  case: upper   # comment\n')
     options = config.load_config(str(cfg_dir))
     assert options['keyword_case'] == 'upper'
@@ -36,7 +36,7 @@ def test_load_config_ignores_comments(tmpdir, monkeypatch):
 
 def test_load_config_home_fallback(tmpdir, monkeypatch):
     home = tmpdir.mkdir('home')
-    cfg = home.join('.sqlparse')
+    cfg = home.join('.sqlparse-format')
     cfg.write('version: 1\nkeywords:\n  case: lower\n')
     monkeypatch.setenv('HOME', str(home))
     options = config.load_config(str(tmpdir))
@@ -67,7 +67,7 @@ def test_load_clang_config_newline_at_eof(tmpdir):
 
 def test_load_config_preserve(tmpdir):
     cfg_dir = tmpdir.mkdir('cfg_preserve')
-    cfg_file = cfg_dir.join('.sqlparse')
+    cfg_file = cfg_dir.join('.sqlparse-format')
     cfg_file.write('version: 1\nkeywords:\n  case: preserve\nidentifiers:\n  case: preserve\n')
     options = config.load_config(str(cfg_dir))
     assert options['keyword_case'] == 'preserve'
@@ -160,7 +160,7 @@ def test_load_clang_config_full_sections(tmpdir):
 
 
 def test_format_uses_config_file(tmpdir, monkeypatch):
-    cfg = tmpdir.join('.sqlparse')
+    cfg = tmpdir.join('.sqlparse-format')
     cfg.write('version: 1\nkeywords:\n  case: upper\nidentifiers:\n  case: upper\n')
     monkeypatch.chdir(str(tmpdir))
     formatted = sqlparse.format('select foo')

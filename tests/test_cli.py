@@ -150,7 +150,7 @@ def test_config_option(tmpdir, capsys):
 def test_default_config(tmpdir, capsys):
     sqlfile = tmpdir.join('in.sql')
     sqlfile.write('select 1+2 as x;')
-    cfg = tmpdir.join('.sqlparse')
+    cfg = tmpdir.join('.sqlparse-format')
     cfg.write('version: 1\nkeywords:\n  case: upper\nspacing:\n  space_around_operators: true\n')
     sqlparse.cli.main([str(sqlfile)])
     out, _ = capsys.readouterr()
@@ -170,7 +170,7 @@ def test_verbose_level(filepath, capsys, no_config):
 def test_verbose_config_source(tmpdir, capsys):
     sqlfile = tmpdir.join('in.sql')
     sqlfile.write('select 1;')
-    cfg = tmpdir.join('.sqlparse')
+    cfg = tmpdir.join('.sqlparse-format')
     cfg.write('version: 1\n')
     sqlparse.verbosity = 0
     sqlparse.cli.main([str(sqlfile), '-v'])

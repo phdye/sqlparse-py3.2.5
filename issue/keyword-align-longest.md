@@ -278,4 +278,4 @@ Why this works:
 
 ---
 
-If you want, I can turn this into a concrete `issue/example.sqlparse` (INI or toml) and note any minimal formatter hooks you’d need to add (e.g., the two‑pass keyword scan and the `grid` packer).
+If you want, I can turn this into a concrete `issue/example.sqlparse-format` (INI or toml) and note any minimal formatter hooks you’d need to add (e.g., the two‑pass keyword scan and the `grid` packer).
