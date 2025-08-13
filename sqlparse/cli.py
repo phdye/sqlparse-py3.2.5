@@ -196,16 +196,13 @@ def main(args=None):
     parser = create_parser()
     args = parser.parse_args(args)
     if args.filename == '-':
-        cfg_path = os.getcwd()
+        start = os.getcwd()
     else:
-        cfg_path = args.filename
-    options = spconfig.DEFAULT_CONFIG.copy()
-    cfg_file = args.config or spconfig.find_config(cfg_path)
-    if cfg_file:
-        try:
-            options.update(spconfig.load_clang_config(cfg_file))
-        except ValueError as e:
-            return _error(str(e))
+        start = args.filename
+    try:
+        options = spconfig.load_config(start, cfg_path=args.config)
+    except ValueError as e:
+        return _error(str(e))
     try:
         options.update(spconfig.load_style(args.style))
     except ValueError as e:
