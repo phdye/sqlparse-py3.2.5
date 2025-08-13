@@ -209,40 +209,15 @@ def main(args=None):
     else:
         start = args.filename
 
-    cfg_path = args.config if args.config else spconfig.find_config(start)
-    try:
-        options = spconfig.load_config(start, cfg_path=cfg_path)
-    except ValueError as e:
-        return _error(str(e))
-    if sqlparse.verbosity >= 1:
-        if cfg_path:
-            sys.stderr.write('[INFO] Loaded configuration from {0}\n'.format(cfg_path))
-        else:
-            sys.stderr.write('[INFO] Using default configuration\n')
-
-    try:
-        style_opts = spconfig.load_style(args.style)
-    except ValueError as e:
-        return _error(str(e))
-    if sqlparse.verbosity >= 1:
-        if args.style:
-            if args.style.startswith('{') and args.style.endswith('}'):
-                sys.stderr.write('[INFO] Loaded style from inline definition\n')
-            else:
-                sys.stderr.write('[INFO] Loaded style {0}\n'.format(args.style))
-        else:
-            sys.stderr.write('[INFO] No style specified\n')
-    options.update(style_opts)
-
     arg_dict = vars(args)
+    options = {}
     for key in spconfig.DEFAULT_CONFIG.keys():
         if key in arg_dict and arg_dict[key] is not None:
             options[key] = arg_dict[key]
-    if sqlparse.verbosity >= 1:
-        sys.stderr.write('[INFO] Loaded command line options\n')
 
     if args.dump_config:
-        sys.stdout.write(spconfig.dump_config(options))
+        cfg = sqlparse.get_config(path=start, cfg_path=args.config, style=args.style, **options)
+        sys.stdout.write(spconfig.dump_config(cfg))
         return 0
 
     if args.filename == '-':  # read from stdin
@@ -270,11 +245,9 @@ def main(args=None):
         stream = sys.stdout
 
     try:
-        formatter_opts = sqlparse.formatter.validate_options(options)
+        s = sqlparse.format(data, path=start, cfg_path=args.config, style=args.style, **options)
     except SQLParseError as e:
         return _error('Invalid options: {}'.format(e))
-
-    s = sqlparse.format(data, **formatter_opts)
     stream.write(s)
     stream.flush()
     if close_stream:

@@ -1,5 +1,7 @@
 import os
 
+import os
+import sqlparse
 from sqlparse import config
 
 
@@ -155,3 +157,18 @@ def test_load_clang_config_full_sections(tmpdir):
     assert opts['comments']['pragma_freeze_directives'] is True
     assert opts['comments']['preserve_comment_position'] is True
     assert opts['penalties']['over_column_limit'] == 500
+
+
+def test_format_uses_config_file(tmpdir, monkeypatch):
+    cfg = tmpdir.join('.sqlparse')
+    cfg.write('version: 1\nkeywords:\n  case: upper\nidentifiers:\n  case: upper\n')
+    monkeypatch.chdir(str(tmpdir))
+    formatted = sqlparse.format('select foo')
+    assert formatted.strip() == 'SELECT FOO'
+
+
+def test_format_uses_cfg_path(tmpdir):
+    cfg = tmpdir.join('style.yaml')
+    cfg.write('version: 1\nkeywords:\n  case: upper\nidentifiers:\n  case: upper\n')
+    formatted = sqlparse.format('select foo', cfg_path=str(cfg))
+    assert formatted.strip() == 'SELECT FOO'
