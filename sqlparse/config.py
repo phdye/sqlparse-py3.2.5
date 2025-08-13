@@ -288,7 +288,12 @@ def load_clang_config(path):
 
 
 def find_config(start):
-    """Search for a .sqlparse file starting from *start*."""
+    """Search for a .sqlparse file starting from *start*.
+
+    The search walks up the directory tree until the root directory is
+    reached.  If no configuration file is found, the user's home directory is
+    checked before giving up.
+    """
     if start is None:
         start = os.getcwd()
     if not os.path.isdir(start):
@@ -302,6 +307,9 @@ def find_config(start):
         if parent == current:
             break
         current = parent
+    home_candidate = os.path.join(os.path.expanduser('~'), '.sqlparse')
+    if os.path.isfile(home_candidate):
+        return home_candidate
     return None
 
 
