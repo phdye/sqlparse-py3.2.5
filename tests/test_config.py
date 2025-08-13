@@ -25,6 +25,15 @@ def test_load_config_ignores_comments(tmpdir, monkeypatch):
     assert options['keyword_case'] == 'upper'
 
 
+def test_load_config_home_fallback(tmpdir, monkeypatch):
+    home = tmpdir.mkdir('home')
+    cfg = home.join('.sqlparse')
+    cfg.write('version: 1\nkeywords:\n  case: lower\n')
+    monkeypatch.setenv('HOME', str(home))
+    options = config.load_config(str(tmpdir))
+    assert options['keyword_case'] == 'lower'
+
+
 def test_dump_config():
     opts = config.DEFAULT_CONFIG.copy()
     opts['keyword_case'] = 'upper'
