@@ -54,16 +54,19 @@ _PLUGIN_MODULES = {
 
 
 def get_config(path=None, cfg_path=None, style=None, include_defaults=True, **options):
+    if path and verbosity >= 1:
+        sys.stderr.write('[INFO] path = {0}\n'.format(path))
     if cfg_path is None:
+        if verbosity >= 1:
+            sys.stderr.write('[INFO] Located configuration from {0}\n'.format(cfg_path))
         cfg_path = config.find_config(path)
+    if verbosity >= 1:
+        sys.stderr.write('[INFO] Seeding with default configuration\n')
     cfg = config.DEFAULT_CONFIG.copy()
     if cfg_path:
-        cfg.update(config.load_config(cfg_path=cfg_path, include_defaults=False))
-    if verbosity >= 1:
-        if cfg_path:
+        if verbosity >= 1:
             sys.stderr.write('[INFO] Loaded configuration from {0}\n'.format(cfg_path))
-        else:
-            sys.stderr.write('[INFO] Using default configuration\n')
+        cfg.update(config.load_config(cfg_path=cfg_path, include_defaults=False))
     try:
         style_opts = config.load_style(style)
     except ValueError:
@@ -123,6 +126,7 @@ def format(sql, encoding=None, **options):
 
     :returns: The formatted SQL statement as string.
     """
+    print('*** sqlparse.format', file=sys.stderr)
     path = options.pop('path', None)
     cfg_path = options.pop('cfg_path', None)
     style = options.pop('style', None)
