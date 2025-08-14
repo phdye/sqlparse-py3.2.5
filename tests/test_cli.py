@@ -157,6 +157,16 @@ def test_default_config(tmpdir, capsys):
     assert out.strip() == 'SELECT 1 + 2 AS x;'
 
 
+def test_cli_overrides_config(tmpdir, capsys):
+    sqlfile = tmpdir.join('in.sql')
+    sqlfile.write('select 1+2 as x;')
+    cfg = tmpdir.join('.sqlparse-format')
+    cfg.write('version: 1\nkeywords:\n  case: upper\n')
+    sqlparse.cli.main([str(sqlfile), '--keywords', 'lower'])
+    out, _ = capsys.readouterr()
+    assert out.strip() == 'select 1+2 as x;'
+
+
 def test_verbose_level(filepath, capsys, no_config):
     path = filepath('function.sql')
     sqlparse.verbosity = 0
