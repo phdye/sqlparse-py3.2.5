@@ -38,6 +38,7 @@ DEFAULT_CONFIG = {
     'truncate_strings': None,
     'truncate_char': '[...]',
     'right_margin': None,
+    'declare_cursor_break_before': False,
 }
 
 # Predefined styles

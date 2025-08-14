@@ -171,6 +171,13 @@ def create_parser():
         help='Insert linebreak before comma (default False)')
 
     group.add_argument(
+        '--declare_cursor_break_before',
+        dest='declare_cursor_break_before',
+        action='store_true',
+        default=None,
+        help='Insert linebreak before DECLARE CURSOR statements')
+
+    group.add_argument(
         '--compact',
         dest='compact',
         default=None,

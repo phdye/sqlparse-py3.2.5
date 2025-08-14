@@ -1,8 +1,8 @@
 Development Version
 -------------------
 
-Nothing yet.
-
+* Preserve DECLARE CURSOR clauses on a single line and add
+  `declare_cursor_break_before` option.
 
 Release 0.5.3 (Dez 10, 2024)
 ----------------------------
