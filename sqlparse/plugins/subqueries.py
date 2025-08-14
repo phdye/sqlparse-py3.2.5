@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+import sys
 import sqlparse
 from sqlparse import plugins
 
@@ -8,6 +9,7 @@ class Subqueries(object):
     """Very small formatter for subquery placement."""
 
     def format(self, sql, options):
+        print(": sqlparse.plugins.subqueries.format(...)", file=sys.stderr)
         open_same = options.get('open_paren_same_line', True)
         body_indent_opt = options.get('body_indent', 2)
         if isinstance(body_indent_opt, str):

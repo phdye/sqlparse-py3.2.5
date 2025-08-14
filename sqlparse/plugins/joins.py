@@ -1,5 +1,6 @@
 import re
 import warnings
+import sys
 
 import sqlparse
 from sqlparse import plugins
@@ -15,6 +16,7 @@ class JoinPlugin(object):
         ``joins`` dictionary with the keys ``join_on_new_line``,
         ``align_on_under_join`` and ``prefer_explicit``.
         """
+        print(": sqlparse.plugins.joins.format(...)", file=sys.stderr)
         if stream is None:
             return stream
 

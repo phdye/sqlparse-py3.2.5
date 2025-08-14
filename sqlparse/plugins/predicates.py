@@ -1,6 +1,7 @@
 """Predicate layout plugin."""
 
 import re
+import sys
 
 from sqlparse import plugins
 
@@ -15,6 +16,7 @@ class PredicateLayout(object):
     """
 
     def format(self, stream, options):
+        print(": sqlparse.plugins.predicates.format(...)", file=sys.stderr)
         opts = options.get('predicates')
         if not isinstance(opts, dict):
             return stream

@@ -6,6 +6,7 @@ from sqlparse import parse
 from sqlparse.sql import Case
 from sqlparse import plugins
 from sqlparse import tokens as T
+import sys
 
 try:
     unicode
@@ -29,6 +30,7 @@ class CaseExpressionFormatter(object):
     """
 
     def format(self, stream, options):
+        print(": sqlparse.plugins.case_expr.format(...)", file=sys.stderr)
         # Allow passing either the whole options dict or the case_expr section.
         case_opts = options.get('case_expr') if isinstance(options, dict) else None
         if case_opts is None:

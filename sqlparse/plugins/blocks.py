@@ -1,5 +1,6 @@
 from __future__ import print_function
 import re
+import sys
 from sqlparse import plugins
 
 
@@ -12,6 +13,7 @@ class BlocksPlugin(object):
     """
 
     def format(self, stream, options):
+        print(": sqlparse.plugins.blocks.format(...)", file=sys.stderr)
         text = stream
         if isinstance(stream, (list, tuple)):
             text = ''.join(stream)

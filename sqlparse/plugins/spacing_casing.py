@@ -1,4 +1,5 @@
 import re
+import sys
 
 import sqlparse
 from sqlparse import keywords
@@ -12,6 +13,7 @@ class SpacingCasing(object):
     RESERVED = set(k.upper() for k in keywords.KEYWORDS_COMMON.keys())
 
     def format(self, text, options):
+        print(": sqlparse.plugins.spacing_casing.format(...)", file=sys.stderr)
         spacing = options.get('spacing') or {}
         if spacing.get('compact_bool_not'):
             text = re.sub(r'\bNOT\s+\(', 'NOT(', text, flags=re.IGNORECASE)

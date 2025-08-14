@@ -1,5 +1,6 @@
 from __future__ import print_function
 import re
+import sys
 
 from sqlparse import plugins
 
@@ -26,6 +27,7 @@ class CommentFormatter(object):
     """
 
     def format(self, sql, options):
+        print(": sqlparse.plugins.comments.format(...)", file=sys.stderr)
         opts = options or {}
         if 'comments' in opts:
             opts = opts.get('comments') or {}

@@ -1,3 +1,4 @@
+import sys
 from sqlparse import plugins
 
 
@@ -15,6 +16,7 @@ class Clauses(object):
 
     def format(self, stream, options):
         """Format *stream* according to clause options in *options*."""
+        print(": sqlparse.plugins.clauses.format(...)", file=sys.stderr)
         text = stream
         if isinstance(stream, (list, tuple)):
             text = ''.join(stream)

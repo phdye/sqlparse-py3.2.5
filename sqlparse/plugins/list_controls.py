@@ -1,4 +1,5 @@
 import re
+import sys
 
 from sqlparse import plugins
 
@@ -12,6 +13,7 @@ class ListControls(object):
     """
 
     def format(self, stream, options):
+        print(": sqlparse.plugins.list_controls.format(...)", file=sys.stderr)
         sql = stream if isinstance(stream, str) else ''.join(stream)
 
         # bin_pack: collapse multi-line lists into a single line

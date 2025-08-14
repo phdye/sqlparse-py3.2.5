@@ -1,3 +1,4 @@
+import sys
 from sqlparse import plugins
 
 
@@ -12,6 +13,7 @@ class CreateTablePlugin(object):
     """
 
     def format(self, stream, options):
+        print(": sqlparse.plugins.create_table.format(...)", file=sys.stderr)
         if isinstance(stream, str):
             sql = stream
         else:

@@ -7,6 +7,7 @@ values can influence formatting without touching the core formatter.
 The implementation is intentionally small and compatible with Python 3.2.5.
 """
 
+import sys
 import sqlparse
 from sqlparse import plugins
 from sqlparse import sql, tokens as T
@@ -23,6 +24,7 @@ class PenaltyTuning(object):
     """
 
     def format(self, stream, options):
+        print(": sqlparse.plugins.penalties.format(...)", file=sys.stderr)
         penalties = options.get('penalties') or {}
         if isinstance(stream, str):
             statements = sqlparse.parse(stream)

@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 import re
+import sys
 
 from sqlparse import plugins
 
@@ -18,6 +19,7 @@ class CTEFormatter(object):
     """
 
     def format(self, sql, options):  # pragma: no cover - exercised via tests
+        print(": sqlparse.plugins.cte.format(...)", file=sys.stderr)
         cte_opts = options.get('cte') or {}
         if not cte_opts:
             return sql

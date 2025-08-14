@@ -1,3 +1,4 @@
+import sys
 from sqlparse import plugins, keywords, tokens as T
 
 @plugins.register_plugin('dialect_strictness')
@@ -5,6 +6,7 @@ class DialectStrictness(object):
     """Handle dialect.strict_keywords and layout.continuation_indent."""
 
     def format(self, stream, options):
+        print(": sqlparse.plugins.dialect_strictness.format(...)", file=sys.stderr)
         if hasattr(stream, 'token_next'):
             return self._postprocess(stream, options)
         return self._preprocess(stream, options)
