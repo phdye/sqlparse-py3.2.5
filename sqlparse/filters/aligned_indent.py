@@ -73,6 +73,7 @@ class AlignedIndentFilter:
         if token is not None:
             with indent(self):
                 tlist.insert_after(tlist[0], self.nl('SELECT'))
+                self._pad_after_keyword(tlist, token, initial=True)
                 # process the inside of the parenthesis
                 self._process_default(tlist)
 
