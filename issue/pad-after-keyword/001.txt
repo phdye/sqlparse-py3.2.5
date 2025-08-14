@@ -1,0 +1,33 @@
+[ 3 ] phdyex @ xps-ne ~/my-repos/sqlparse-3.2.5
+$ cat /home/phdyex/.sqlparse-format
+version: 1
+keyword_case: upper
+identifier_case: lower
+strip_whitespace: true
+reindent_aligned: true
+pad_after_keyword: 2
+align_longest_keyword: true
+comma_first: true
+initial_indent: 4
+initial_pad_after_keyword: 2
+id_layout: hanging
+newline_at_eof: true
+
+[ 3 ] phdyex @ xps-ne ~/my-repos/sqlparse-3.2.5
+$ sqlformat -v qqq
+[INFO] path = qqq
+[INFO] Located configuration from None
+[INFO] Seeding with default configuration
+[INFO] Loaded configuration from /home/phdyex/.sqlparse-format
+[INFO] No style specified
+EXEC SQL
+    SELECT  count(*)
+      INTO  :count
+      FROM  apps.periods
+     WHERE  period_status = 'Open'
+       AND  uidproduct = (
+            SELECT uidproduct
+              FROM  apps.product
+             WHERE  name = 'UNBILLED'
+           )
+       AND  period_name = to_char(to_date(:period,'MON-RR'),'MON-YYYY');
