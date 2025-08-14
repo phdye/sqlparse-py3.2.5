@@ -56,7 +56,9 @@ _PLUGIN_MODULES = {
 def get_config(path=None, cfg_path=None, style=None, include_defaults=True, **options):
     if cfg_path is None:
         cfg_path = config.find_config(path)
-    cfg = config.load_config(path, cfg_path=cfg_path, include_defaults=include_defaults)
+    cfg = config.DEFAULT_CONFIG.copy()
+    if cfg_path:
+        cfg.update(config.load_config(cfg_path=cfg_path, include_defaults=False))
     if verbosity >= 1:
         if cfg_path:
             sys.stderr.write('[INFO] Loaded configuration from {0}\n'.format(cfg_path))
@@ -79,6 +81,9 @@ def get_config(path=None, cfg_path=None, style=None, include_defaults=True, **op
         cfg.update(options)
         if verbosity >= 1:
             sys.stderr.write('[INFO] Loaded command line options\n')
+    if not include_defaults:
+        cfg = {k: v for k, v in cfg.items()
+               if k not in config.DEFAULT_CONFIG or v != config.DEFAULT_CONFIG[k]}
     return cfg
 
 
@@ -90,7 +95,7 @@ def parse(sql, encoding=None, dialect=None, **kwargs):
     :returns: A tuple of :class:`~sqlparse.sql.Statement` instances.
     """
     if dialect is None:
-        dialect = get_config(include_defaults=False, **kwargs).get('dialect')
+        dialect = get_config(**kwargs).get('dialect')
     return tuple(parsestream(sql, encoding, dialect, **kwargs))
 
 
@@ -102,7 +107,7 @@ def parsestream(stream, encoding=None, dialect=None, **kwargs):
     :returns: A generator of :class:`~sqlparse.sql.Statement` instances.
     """
     if dialect is None:
-        dialect = get_config(include_defaults=False, **kwargs).get('dialect')
+        dialect = get_config(**kwargs).get('dialect')
     stack = engine.FilterStack(dialect=dialect)
     stack.enable_grouping()
     return stack.run(stream, encoding)
@@ -203,6 +208,6 @@ def split(sql, encoding=None, dialect=None, strip_semicolon=False, **kwargs):
     :returns: A list of strings.
     """
     if dialect is None:
-        dialect = get_config(include_defaults=False, **kwargs).get('dialect')
+        dialect = get_config(**kwargs).get('dialect')
     stack = engine.FilterStack(dialect=dialect, strip_semicolon=strip_semicolon)
     return [str(stmt).strip() for stmt in stack.run(sql, encoding)]
