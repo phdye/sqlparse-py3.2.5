@@ -212,6 +212,11 @@ def validate_options(options):  # noqa: C901
         raise SQLParseError('compact requires a boolean value')
     options['compact'] = compact
 
+    declare_cursor_break_before = options.get('declare_cursor_break_before', False)
+    if declare_cursor_break_before not in [True, False]:
+        raise SQLParseError('declare_cursor_break_before requires a boolean value')
+    options['declare_cursor_break_before'] = declare_cursor_break_before
+
     right_margin = options.get('right_margin')
     if right_margin is not None:
         try:
@@ -278,7 +283,8 @@ def build_filter_stack(stack, options):
                 indent_columns=options['indent_columns'],
                 wrap_after=options['wrap_after'],
                 comma_first=options['comma_first'],
-                compact=options['compact'],))
+                compact=options['compact'],
+                declare_cursor_break_before=options['declare_cursor_break_before'],))
 
     if options.get('reindent_aligned', False):
         stack.enable_grouping()

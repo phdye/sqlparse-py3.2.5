@@ -660,6 +660,20 @@ class TestFormatReindent:
             'from employees',
             'where employee_id = :id;'])
 
+    def test_declare_cursor_default(self):
+        sql = 'EXEC SQL AT :server_alias DECLARE csr CURSOR FOR SELECT foo'
+        formatted = sqlparse.format(sql, reindent=True)
+        assert formatted == ('EXEC SQL AT :server_alias DECLARE csr CURSOR FOR\n'
+                             'SELECT foo')
+
+    def test_declare_cursor_break_before(self):
+        sql = 'EXEC SQL AT :server_alias DECLARE csr CURSOR FOR SELECT foo'
+        formatted = sqlparse.format(
+            sql, reindent=True, declare_cursor_break_before=True)
+        assert formatted == ('EXEC SQL AT :server_alias\n'
+                             'DECLARE csr CURSOR FOR\n'
+                             'SELECT foo')
+
 
 class TestOutputFormat:
     def test_python(self):
