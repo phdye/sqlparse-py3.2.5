@@ -56,12 +56,7 @@ _PLUGIN_MODULES = {
 def get_config(path=None, cfg_path=None, style=None, include_defaults=True, **options):
     if cfg_path is None:
         cfg_path = config.find_config(path)
-    if include_defaults:
-        cfg = config.load_config(path, cfg_path=cfg_path)
-    else:
-        cfg = {}
-        if cfg_path:
-            cfg.update(config.load_clang_config(cfg_path))
+    cfg = config.load_config(path, cfg_path=cfg_path, include_defaults=include_defaults)
     if verbosity >= 1:
         if cfg_path:
             sys.stderr.write('[INFO] Loaded configuration from {0}\n'.format(cfg_path))

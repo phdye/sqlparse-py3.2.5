@@ -1,7 +1,7 @@
 import sqlparse
 from sqlparse import config
 
-def test_format_applies_clang_config(tmpdir):
+def test_format_applies_yaml_config(tmpdir):
     cfg = tmpdir.join('.sqlparse-format')
     cfg.write(
         'version: 1\n'

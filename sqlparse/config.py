@@ -47,38 +47,6 @@ PREDEFINED_STYLES = {
     'mysql': {'keyword_case': 'upper'},
 }
 
-# Mapping from config file keys to internal names
-KEY_MAP = {
-    'Dialect': 'dialect',
-    'Flavor': 'dialect',
-    'KeywordCase': 'keyword_case',
-    'IdentifierCase': 'identifier_case',
-    'OutputFormat': 'output_format',
-    'StripComments': 'strip_comments',
-    'Reindent': 'reindent',
-    'IndentWidth': 'indent_width',
-    'IndentAfterFirst': 'indent_after_first',
-    'IndentColumns': 'indent_columns',
-    'ReindentAligned': 'reindent_aligned',
-    'UseSpaceAroundOperators': 'use_space_around_operators',
-    'SpacesInParens': 'spaces_in_parens',
-    'SpacesInBrackets': 'spaces_in_brackets',
-    'SpaceBeforeCallParen': 'space_before_call_paren',
-    'WrapAfter': 'wrap_after',
-    'CommaFirst': 'comma_first',
-    'Compact': 'compact',
-    'IndentTabs': 'indent_tabs',
-    'StripWhitespace': 'strip_whitespace',
-    'TruncateStrings': 'truncate_strings',
-    'TruncateChar': 'truncate_char',
-    'RightMargin': 'right_margin',
-    'PadAfterKeyword': 'pad_after_keyword',
-    'AlignLongestKeyword': 'align_longest_keyword',
-    'IdLayout': 'id_layout',
-    'StripTrailingWhitespace': 'strip_trailing_whitespace',
-    'BasedOnStyle': 'BasedOnStyle',
-}
-
 BOOL_TRUE = ['true', 'yes', 'on']
 BOOL_FALSE = ['false', 'no', 'off']
 
@@ -144,45 +112,8 @@ def _parse_yaml(text):
     return _parse_simple_yaml(text)
 
 
-def load_from_file(path):
-    """Load options from a configuration file."""
-    try:
-        stream = open(path, 'r')
-        try:
-            text = stream.read()
-        finally:
-            stream.close()
-    except OSError:
-        return {}
-    data = _parse_yaml(text) or {}
-    return _convert_keys(data)
-
-
-def load_from_string(text):
-    data = _parse_yaml(text) or {}
-    return _convert_keys(data)
-
-
-def _convert_keys(data):
-    result = {}
-    based = data.pop('BasedOnStyle', None)
-    if based:
-        base = PREDEFINED_STYLES.get(str(based).lower())
-        if base is None:
-            base = {}
-        result.update(base)
-    for key, value in data.items():
-        mapped = KEY_MAP.get(key)
-        if mapped and mapped != 'BasedOnStyle':
-            if isinstance(value, str) and mapped in (
-                    'keyword_case', 'identifier_case', 'output_format'):
-                value = value.lower()
-            result[mapped] = value
-    return result
-
-
-def load_clang_config(path):
-    """Load options from a clang-style YAML configuration."""
+def _load_config_file(path):
+    """Load options from a YAML configuration file."""
     try:
         stream = open(path, 'r')
         try:
@@ -313,18 +244,20 @@ def find_config(start):
     return None
 
 
-def load_config(path, cfg_path=None):
+def load_config(path=None, cfg_path=None, include_defaults=True):
     """Load options from *cfg_path* or search starting at *path*.
 
     If *cfg_path* is provided it is used directly as configuration file.
     Otherwise :func:`find_config` is used to locate a ``.sqlparse-format`` file
     beginning at *path*.
+
+    Set *include_defaults* to ``False`` to omit default options.
     """
-    cfg = DEFAULT_CONFIG.copy()
+    cfg = DEFAULT_CONFIG.copy() if include_defaults else {}
     if cfg_path is None:
         cfg_path = find_config(path)
     if cfg_path:
-        cfg.update(load_clang_config(cfg_path))
+        cfg.update(_load_config_file(cfg_path))
     return cfg
 
 
@@ -332,7 +265,12 @@ def load_style(style):
     if not style or style == 'file':
         return {}
     if style.startswith('{') and style.endswith('}'):
-        return load_from_string(style)
+        data = _parse_yaml(style) or {}
+        for key in ('keyword_case', 'identifier_case', 'output_format'):
+            val = data.get(key)
+            if isinstance(val, str):
+                data[key] = val.lower()
+        return data
     style_lower = style.lower()
     found = PREDEFINED_STYLES.get(style_lower)
     if found is None:
@@ -341,12 +279,10 @@ def load_style(style):
 
 
 def dump_config(options):
-    lines = []
-    for key, snake in KEY_MAP.items():
-        if snake == 'BasedOnStyle':
-            continue
-        if snake in options and options[snake] is not None:
-            value = options[snake]
+    lines = ['version: 1']
+    for key in DEFAULT_CONFIG:
+        if key in options and options[key] is not None:
+            value = options[key]
             if isinstance(value, bool):
                 value = 'true' if value else 'false'
             lines.append('{0}: {1}'.format(key, value))
