@@ -87,8 +87,13 @@ class ReindentFilter:
                 del tlist.tokens[pidx]
                 tidx -= 1
 
+            insert_offset = 0
+            if (token.normalized == 'DECLARE'
+                    and self.declare_cursor_break_before):
+                insert_offset = self.width
+
             if not (uprev.endswith('\n') or uprev.endswith('\r')):
-                tlist.insert_before(tidx, self.nl())
+                tlist.insert_before(tidx, self.nl(insert_offset))
                 tidx += 1
 
             tidx, token = self._next_token(tlist, tidx)
@@ -101,9 +106,20 @@ class ReindentFilter:
             if prev_ and prev_.is_whitespace:
                 del tlist.tokens[pidx]
                 tidx -= 1
+            pidx, prev_ = tlist.token_prev(tidx, skip_ws=True)
+
+            insert_offset = 0
+            if (token.normalized == 'SELECT' and prev_
+                    and prev_.normalized == 'FOR'):
+                ppidx, prev_prev = tlist.token_prev(pidx, skip_ws=True)
+                if prev_prev and prev_prev.normalized == 'CURSOR':
+                    insert_offset = self.width
+                    if self.declare_cursor_break_before:
+                        insert_offset += self.width
+
             # only break if it's not the first token
             if prev_:
-                tlist.insert_before(tidx, self.nl())
+                tlist.insert_before(tidx, self.nl(insert_offset))
                 tidx += 1
             tidx, token = tlist.token_next_by(t=ttypes, idx=tidx)
 
