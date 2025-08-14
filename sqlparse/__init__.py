@@ -126,7 +126,7 @@ def format(sql, encoding=None, **options):
 
     :returns: The formatted SQL statement as string.
     """
-    print('*** sqlparse.format', file=sys.stderr)
+    # print('*** sqlparse.format', file=sys.stderr)
     path = options.pop('path', None)
     cfg_path = options.pop('cfg_path', None)
     style = options.pop('style', None)
