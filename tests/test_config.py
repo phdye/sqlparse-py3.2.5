@@ -47,21 +47,30 @@ def test_dump_config():
     opts = config.DEFAULT_CONFIG.copy()
     opts['keyword_case'] = 'upper'
     dumped = config.dump_config(opts)
-    assert 'KeywordCase: upper' in dumped
+    assert 'keyword_case: upper' in dumped
 
 
-def test_load_clang_config(tmpdir):
+def test_load_config_default_options(tmpdir):
+    cfg = tmpdir.join('extra.yaml')
+    cfg.write('version: 1\npad_after_keyword: 2\nalign_longest_keyword: true\nright_margin: 80\n')
+    opts = config.load_config(None, str(cfg), include_defaults=False)
+    assert opts['pad_after_keyword'] == 2
+    assert opts['align_longest_keyword'] is True
+    assert opts['right_margin'] == 80
+
+
+def test_load_config_direct(tmpdir):
     cfg = tmpdir.join('style.yaml')
     cfg.write('version: 1\nlayout:\n  indent_width: 3\nkeywords:\n  case: lower\n')
-    opts = config.load_clang_config(str(cfg))
+    opts = config.load_config(None, str(cfg), include_defaults=False)
     assert opts['indent_width'] == 3
     assert opts['keyword_case'] == 'lower'
 
 
-def test_load_clang_config_newline_at_eof(tmpdir):
+def test_load_config_newline_at_eof(tmpdir):
     cfg = tmpdir.join('newline.yaml')
     cfg.write('version: 1\nlayout:\n  newline_at_eof: true\n')
-    opts = config.load_clang_config(str(cfg))
+    opts = config.load_config(None, str(cfg), include_defaults=False)
     assert opts['newline_at_eof'] is True
 
 
@@ -74,23 +83,23 @@ def test_load_config_preserve(tmpdir):
     assert options['identifier_case'] == 'preserve'
 
 
-def test_load_clang_config_preserve(tmpdir):
+def test_load_config_preserve_direct(tmpdir):
     cfg = tmpdir.join('style_preserve.yaml')
     cfg.write('version: 1\nkeywords:\n  case: preserve\nidentifiers:\n  case: preserve\n')
-    opts = config.load_clang_config(str(cfg))
+    opts = config.load_config(None, str(cfg), include_defaults=False)
     assert opts['keyword_case'] == 'preserve'
     assert opts['identifier_case'] == 'preserve'
 
 
-def test_load_clang_config_equals(tmpdir):
+def test_load_config_equals(tmpdir):
     cfg = tmpdir.join('style.ini')
     cfg.write('[sqlformat]\nversion = 1\nreindent = true\nkeyword_case = upper\n')
-    opts = config.load_clang_config(str(cfg))
+    opts = config.load_config(None, str(cfg), include_defaults=False)
     assert opts['reindent'] is True
     assert opts['keyword_case'] == 'upper'
 
 
-def test_load_clang_config_full_sections(tmpdir):
+def test_load_config_full_sections(tmpdir):
     cfg = tmpdir.join('style_full.yaml')
     cfg.write(
         'version: 1\n'
@@ -134,7 +143,7 @@ def test_load_clang_config_full_sections(tmpdir):
         'penalties:\n'
         '  over_column_limit: 500\n'
     )
-    opts = config.load_clang_config(str(cfg))
+    opts = config.load_config(None, str(cfg), include_defaults=False)
     assert opts['indent_width'] == 4
     assert opts['indent_tabs'] is True
     assert opts['spaces_in_parens'] is True

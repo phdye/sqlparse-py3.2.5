@@ -126,7 +126,7 @@ def test_dump_config(filepath, capsys):
     path = filepath('function.sql')
     sqlparse.cli.main([path, '--dump-config'])
     out, _ = capsys.readouterr()
-    assert 'IndentWidth: 2' in out
+    assert 'indent_width: 2' in out
 
 
 def test_style_option(filepath, load_file, capsys, no_config):
