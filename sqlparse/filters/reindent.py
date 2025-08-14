@@ -12,7 +12,8 @@ from sqlparse.utils import offset, indent
 class ReindentFilter:
     def __init__(self, width=2, char=' ', wrap_after=0, n='\n',
                  comma_first=False, indent_after_first=False,
-                 indent_columns=False, compact=False):
+                 indent_columns=False, compact=False,
+                 declare_cursor_break_before=False):
         self.n = n
         self.width = width
         self.char = char
@@ -22,6 +23,7 @@ class ReindentFilter:
         self.comma_first = comma_first
         self.indent_columns = indent_columns
         self.compact = compact
+        self.declare_cursor_break_before = declare_cursor_break_before
         self._curr_stmt = None
         self._last_stmt = None
         self._last_func = None
@@ -52,11 +54,13 @@ class ReindentFilter:
             self.n + self.char * max(0, self.leading_ws + offset))
 
     def _next_token(self, tlist, idx=-1):
-        split_words = ('FROM', 'STRAIGHT_JOIN$', 'JOIN$', 'AND', 'OR',
+        split_words = ['FROM', 'STRAIGHT_JOIN$', 'JOIN$', r'^AND$', r'^OR$',
                        'GROUP BY', 'ORDER BY', 'UNION', 'VALUES',
                        'SET', 'BETWEEN', 'EXCEPT', 'HAVING', 'LIMIT',
-                       'INTO')
-        m_split = T.Keyword, split_words, True
+                       'INTO']
+        if self.declare_cursor_break_before:
+            split_words.append(r'^DECLARE$')
+        m_split = T.Keyword, tuple(split_words), True
         tidx, token = tlist.token_next_by(m=m_split, idx=idx)
 
         if token and token.normalized == 'BETWEEN':
