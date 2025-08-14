@@ -173,7 +173,7 @@ def test_verbose_level(filepath, capsys, no_config):
     sqlparse.cli.main([path, '-v'])
     assert sqlparse.verbosity == 1
     _, err = capsys.readouterr()
-    assert '[INFO] Using default configuration' in err
+    assert '[INFO] Seeding with default configuration' in err
     sqlparse.verbosity = 0
 
 
