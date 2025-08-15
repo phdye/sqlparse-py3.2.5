@@ -1,0 +1,24 @@
+For 'EXEC SQL [AT :<server-alias>] DECLARE <cursor> CURSOR FOR ...".
+
+Currently it is formatted thus:
+```
+                EXEC SQL AT :server_alias DECLARE csr_prod
+                    CURSOR
+                       FOR
+                    SELECT  <identifier>
+```
+
+Update such that:
+
+- Default behavior, formats as:
+```
+                EXEC SQL AT :server_alias DECLARE csr CURSOR FOR
+                    SELECT  <identifier>
+```
+
+- With option '--declare-cursor-break-before', format as:
+```
+                EXEC SQL AT :server_alias
+                    DECLARE csr CURSOR FOR
+                        SELECT  <identifier>
+```
