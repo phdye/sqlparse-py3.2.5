@@ -1,14 +1,16 @@
 import warnings
 
 import sqlparse
-import warnings
 
 from sqlparse import plugins
 
 
 def run_plugin(sql, opts):
     cls = plugins.get_plugin('joins')
-    return cls().format(sql, {'joins': opts})
+    formatted = sqlparse.format(sql, reindent=True)
+    stmt = sqlparse.parse(formatted)[0]
+    stmt = cls().format(stmt, {'joins': opts})
+    return str(stmt)
 
 
 def test_join_alignment():
@@ -42,5 +44,6 @@ def test_prefer_explicit_warns():
     cls = plugins.get_plugin('joins')
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter('always')
-        cls().format(sql, {'joins': {'prefer_explicit': True}})
+        stmt = sqlparse.parse(sql)[0]
+        cls().format(stmt, {'joins': {'prefer_explicit': True}})
         assert w
