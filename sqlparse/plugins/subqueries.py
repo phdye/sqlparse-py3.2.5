@@ -4,12 +4,26 @@ import sqlparse
 from sqlparse import plugins
 
 
-class Subqueries(object):
-    """Very small formatter for subquery placement."""
+class SubqueriesPlugin(object):
+    """Formatter plugin to handle subquery placement."""
 
-    def format(self, sql, options):
-        open_same = options.get('open_paren_same_line', True)
-        body_indent_opt = options.get('body_indent', 2)
+    def format(self, stream, options):
+        """Run the plugin on *stream* using *options*.
+
+        The plugin only operates on :class:`Statement` instances during
+        postprocessing. For other stream types the input is returned
+        unchanged.
+        """
+        if stream is None:
+            return stream
+        sub_opts = options.get('subqueries') or {}
+        if hasattr(stream, 'token_next'):
+            return self._postprocess(stream, sub_opts, options)
+        return stream
+
+    def _postprocess(self, stmt, sub_opts, options):
+        open_same = sub_opts.get('open_paren_same_line', True)
+        body_indent_opt = sub_opts.get('body_indent', 2)
         if isinstance(body_indent_opt, str):
             opt = body_indent_opt.lower()
             if opt == 'plus_one':
@@ -23,8 +37,8 @@ class Subqueries(object):
                     body_indent = options.get('indent_width', 2)
         else:
             body_indent = int(body_indent_opt)
-        close_align = options.get('close_paren_align_with_open', True)
-        prefer_kw_newline = options.get('prefer_keyword_on_newline', False)
+        close_align = sub_opts.get('close_paren_align_with_open', True)
+        prefer_kw_newline = sub_opts.get('prefer_keyword_on_newline', False)
 
         def find_subqueries(text):
             positions = []
@@ -59,6 +73,7 @@ class Subqueries(object):
             stripped = line.lstrip(' ')
             return len(line) - len(stripped)
 
+        sql = str(stmt)
         positions = find_subqueries(sql)
         for start, end in reversed(positions):
             inner = sql[start + 1:end]
@@ -95,7 +110,8 @@ class Subqueries(object):
 
             sql = before + replacement + after
 
-        return sql
+        return sqlparse.parse(sql)[0]
 
 
-plugins.register_plugin('subqueries', Subqueries)
+plugins.register_plugin('subqueries', SubqueriesPlugin)
+
