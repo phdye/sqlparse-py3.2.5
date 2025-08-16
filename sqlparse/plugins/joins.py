@@ -1,8 +1,6 @@
-import re
 import warnings
 
-import sqlparse
-from sqlparse import plugins
+from sqlparse import plugins, sql, tokens as T
 
 
 class JoinPlugin(object):
@@ -11,58 +9,93 @@ class JoinPlugin(object):
     def format(self, stream, options):
         """Format *stream* according to join options.
 
-        *stream* may be a SQL string. *options* is expected to contain a
-        ``joins`` dictionary with the keys ``join_on_new_line``,
-        ``align_on_under_join`` and ``prefer_explicit``.
+        If *stream* is a :class:`Statement` the token tree is modified in-place
+        according to ``joins`` options. For other stream types the input is
+        returned unchanged.
         """
         if stream is None:
             return stream
-
-        text = stream
         join_opts = options.get('joins') or {}
+        if hasattr(stream, 'token_next'):
+            return self._postprocess(stream, join_opts)
+        return stream
+
+    def _postprocess(self, stmt, join_opts):
         join_on_new_line = bool(join_opts.get('join_on_new_line'))
         align_on_under_join = bool(join_opts.get('align_on_under_join'))
         prefer_explicit = bool(join_opts.get('prefer_explicit'))
 
         if prefer_explicit:
-            if re.search(r'\bfrom\b[^;]*,[^;]*', text, re.I):
-                warnings.warn('comma join detected', UserWarning)
+            self._check_comma_join(stmt)
 
-        formatted = sqlparse.format(text, reindent=True)
-        lines = formatted.splitlines()
+        if not join_on_new_line and not align_on_under_join:
+            return stmt
+
+        tokens = list(stmt.flatten())
+        length = len(tokens)
         i = 0
-        while i < len(lines):
-            line = lines[i]
-            stripped = line.lstrip()
-            lower = stripped.lower()
-            if re.search(r'\bjoin\b', lower):
-                join_indent = len(line) - len(stripped)
-                on_match = re.search(r'\bON\b', line, re.I)
-                if on_match:
-                    if join_on_new_line:
-                        join_part = line[:on_match.start()].rstrip()
-                        on_part = line[on_match.start():].lstrip()
-                        indent = join_indent if align_on_under_join else join_indent + 2
-                        lines[i] = join_part
-                        lines.insert(i + 1, ' ' * indent + on_part)
-                        i += 2
-                        continue
-                else:
-                    if not join_on_new_line and i > 0:
-                        prev = lines[i - 1].rstrip()
-                        lines[i - 1] = prev + ' ' + stripped
-                        lines.pop(i)
-                        if i < len(lines) and lines[i].lstrip().lower().startswith('on '):
-                            if align_on_under_join:
-                                join_pos = lines[i - 1].lower().find('join')
-                                lines[i] = ' ' * join_pos + lines[i].lstrip()
-                        continue
-                if align_on_under_join and i + 1 < len(lines):
-                    next_line = lines[i + 1]
-                    if next_line.lstrip().lower().startswith('on '):
-                        lines[i + 1] = ' ' * (join_indent if align_on_under_join else join_indent + 2) + next_line.lstrip()
+        while i < length:
+            tok = tokens[i]
+            if tok.is_keyword and 'JOIN' in tok.normalized:
+                j = i + 1
+                while j < length:
+                    nt = tokens[j]
+                    if nt.is_keyword and nt.normalized == 'ON':
+                        self._adjust_on(tokens, i, j, join_on_new_line,
+                                         align_on_under_join)
+                        break
+                    if nt.is_keyword and 'JOIN' in nt.normalized:
+                        break
+                    if nt.is_keyword and nt.normalized in (
+                            'WHERE', 'GROUP', 'ORDER', 'LIMIT'):
+                        break
+                    j += 1
+                i = j
             i += 1
-        return '\n'.join(lines)
+        return stmt
+
+    def _adjust_on(self, tokens, join_idx, on_idx, new_line, align):
+        on_tok = tokens[on_idx]
+
+        join_indent = 0
+        if join_idx > 0:
+            prev = tokens[join_idx - 1]
+            if prev.is_whitespace:
+                parts = prev.value.split('\n')
+                join_indent = len(parts[-1])
+
+        if new_line:
+            indent = join_indent
+            if not align:
+                indent += 2
+            prev = tokens[on_idx - 1]
+            ws = '\n' + ' ' * indent
+            if prev.is_whitespace:
+                prev.value = ws
+            else:
+                on_tok.parent.insert_before(on_tok, sql.Token(T.Whitespace, ws))
+        else:
+            prev = tokens[on_idx - 1]
+            if prev.is_whitespace:
+                prev.value = ' '
+            else:
+                on_tok.parent.insert_before(on_tok, sql.Token(T.Whitespace, ' '))
+
+    def _check_comma_join(self, stmt):
+        tokens = list(stmt.flatten())
+        in_from = False
+        for tok in tokens:
+            if tok.is_keyword and tok.normalized == 'FROM':
+                in_from = True
+                continue
+            if in_from:
+                if tok.ttype in T.Punctuation and tok.value == ',':
+                    warnings.warn('comma join detected', UserWarning)
+                    return
+                if tok.is_keyword and tok.normalized in (
+                        'WHERE', 'GROUP', 'ORDER', 'LIMIT'):
+                    return
 
 
 plugins.register_plugin('joins', JoinPlugin)
+
