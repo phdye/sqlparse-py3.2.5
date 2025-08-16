@@ -1,63 +1,54 @@
-import re
-import warnings
-
-import sqlparse
-from sqlparse import plugins
+from sqlparse import plugins, sql, tokens as T
 
 
 class DeclareCursorPlugin(object):
     """Formatter plugin implementing DECLARE CURSOR configuration options."""
 
     def format(self, stream, options):
-        """Format *stream* according to declare_cursor options.
-
-        EXEC SQL DECLARE [AT <db-alias>] CURSOR <cursor-name> FOR <query>;
-
-        *stream* may be a SQL string. *options* is expected to contain a
-        ``declare_cursor`` dictionary with the keys ``break_before``
-    
-        Default behavior is to format the DECLARE CURSOR statement as follows:
-          EXEC SQL [AT <db-alias>] DECLARE CURSOR <cursor-name> FOR
-              <query>;
-
-        If ``break_before`` is True, the statement is formatted as:
-          EXEC SQL [AT <db-alias>]
-              DECLARE CURSOR <cursor-name> FOR
-                  <query>;
-
-        """
         if stream is None:
             return stream
 
-        text = stream
-        options = options.get('declare_cursor') or {}
-        break_before = bool(options.get('break_before'))
+        opts = options.get('declare_cursor') or {}
+        break_before = bool(opts.get('break_before'))
 
-        formatted = sqlparse.format(text, reindent=True)
-        if not break_before:
-            return formatted
+        if hasattr(stream, 'token_next'):
+            return self._postprocess(stream, options, break_before)
 
-        lines = formatted.splitlines()
-        i = 0
-        while i < len(lines):
-            line = lines[i]
-            stripped = line.lstrip()
-            lower = stripped.lower()
-            if re.search(r'\bdeclare cursor\b', lower):
-                stmt_indent = len(line) - len(stripped)
-                for_match = re.search(r'\bfor\b', line, re.IGNORECASE)
-                if not for_match:
-                    warnings.warn("No 'FOR' clause found on DECLARE CURSOR statement line.", UserWarning)
-                    return formatted
-                declare_part = line[:for_match.end()].rstrip()
-                if len(line) <= len(declare_part):
-                    return formatted
-                query_part = line[for_match.end()+1:].lstrip()
-                indent = stmt_indent + 4
-                lines[i] = declare_part
-                lines.insert(i + 1, ' ' * indent + query_part)
-                i += 1
-            i += 1
-        return '\n'.join(lines)
+        # Only manipulate statements during postprocess. For other phases
+        # (token generator or final string) return input unchanged.
+        return stream
+
+    def _postprocess(self, stmt, options, break_before):
+        indent_width = options.get('indent_width', 2)
+
+        didx, declare_tok = stmt.token_next_by(m=(T.Keyword, 'DECLARE'))
+        if declare_tok is None:
+            return stmt
+
+        fidx, for_tok = stmt.token_next_by(m=(T.Keyword, 'FOR'), idx=didx)
+        if for_tok is None:
+            return stmt
+
+        if break_before:
+            pidx, prev_tok = stmt.token_prev(didx, skip_ws=False)
+            ws = '\n' + ' ' * indent_width
+            if prev_tok is not None and prev_tok.is_whitespace:
+                prev_tok.value = ws
+            else:
+                stmt.insert_before(declare_tok, sql.Token(T.Whitespace, ws))
+                fidx += 1
+                didx += 1
+
+        base = indent_width * (1 if break_before else 0)
+        ws_query = '\n' + ' ' * (base + indent_width)
+        nidx, next_tok = stmt.token_next(fidx, skip_ws=False)
+        if next_tok is not None and next_tok.is_whitespace:
+            next_tok.value = ws_query
+        else:
+            stmt.insert_after(for_tok, sql.Token(T.Whitespace, ws_query))
+
+        return stmt
+
 
 plugins.register_plugin('declare_cursor', DeclareCursorPlugin)
+
