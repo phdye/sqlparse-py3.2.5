@@ -45,11 +45,13 @@ class DeclareCursorPlugin(object):
             lower = stripped.lower()
             if re.search(r'\bdeclare cursor\b', lower):
                 stmt_indent = len(line) - len(stripped)
-                for_match = re.search(r'\bfor\b', line, lower)
+                for_match = re.search(r'\bfor\b', line, re.IGNORECASE)
                 if not for_match:
                     warnings.warn("No 'FOR' clause found on DECLARE CURSOR statement line.", UserWarning)
                     return formatted
                 declare_part = line[:for_match.end()].rstrip()
+                if len(line) <= len(declare_part):
+                    return formatted
                 query_part = line[for_match.end()+1:].lstrip()
                 indent = stmt_indent + 4
                 lines[i] = declare_part
