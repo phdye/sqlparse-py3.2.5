@@ -1,5 +1,4 @@
 from sqlparse.plugins import get_plugin
-import sqlparse.plugins.comments  # ensure plugin registration
 
 
 def _format(sql, **opts):

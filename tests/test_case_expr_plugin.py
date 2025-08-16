@@ -1,4 +1,3 @@
-import sqlparse.plugins.case_expr  # ensure registration
 from sqlparse import plugins
 
 

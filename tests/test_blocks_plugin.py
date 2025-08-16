@@ -1,5 +1,4 @@
 from sqlparse import plugins
-import sqlparse.plugins.blocks  # noqa: F401  ensure registration
 
 
 def _run(sql, options):
