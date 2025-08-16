@@ -5,6 +5,12 @@ sqlparse provides a lightweight plugin registry located at
 `sqlparse/plugins/__init__.py`. Each formatter enhancement can live in its own
 module and register itself with the registry without modifying shared code.
 
+Plugins are discovered lazily.  Bundled plugins are located by scanning the
+``sqlparse.plugins`` package, while third-party plugins can advertise
+themselves via the ``sqlparse.plugins`` entry point group.  Discovery happens on
+first access so simply installing a package exposing an entry point makes the
+plugin available without touching the core library.
+
 ## Writing a plugin
 
 1. Create a module inside `sqlparse/plugins/`.
@@ -22,6 +28,16 @@ class CustomOption(object):
 ```
 
 4. Add tests demonstrating the plugin behaviour.
+
+To publish a plugin in a separate package add an entry point to your
+``pyproject.toml``::
+
+    [project.entry-points."sqlparse.plugins"]
+    my_plugin = "mypackage.module:PluginClass"
+
+Users may control which plugins load by defining the environment variables
+``SQLPARSE_ENABLED_PLUGINS`` or ``SQLPARSE_DISABLED_PLUGINS`` with comma
+separated plugin names.
 
 ## Development guidelines
 

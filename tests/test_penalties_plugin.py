@@ -1,8 +1,5 @@
 import sqlparse
-
-import sqlparse
 from sqlparse import plugins
-import sqlparse.plugins.penalties  # noqa: F401
 
 
 def _run_plugin(sql, penalties):

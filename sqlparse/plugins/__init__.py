@@ -3,10 +3,24 @@
 This lightweight registry allows formatter features to be developed as
 standalone plugins. Each plugin registers itself with a unique name so that
 multiple teams can work on separate features concurrently without touching
-shared state.
+shared state.  Registration happens automatically through a discovery
+mechanism so that new plugins can be added without modifying this file.
 """
 
+import importlib
+import os
+import pkgutil
+
+try:  # pragma: no cover - dependency optional on old Pythons
+    from importlib import metadata as importlib_metadata
+except Exception:  # pragma: no cover
+    try:  # type: ignore
+        import importlib_metadata as importlib_metadata
+    except Exception:  # pragma: no cover
+        importlib_metadata = None  # type: ignore
+
 _registry = {}
+_discovered = False
 
 
 def register_plugin(name, plugin_cls=None):
@@ -29,15 +43,70 @@ def register_plugin(name, plugin_cls=None):
     return plugin_cls
 
 
+def _should_load(name, enabled, disabled):
+    if name.startswith('_'):
+        return False
+    if enabled and name not in enabled:
+        return False
+    if name in disabled:
+        return False
+    return True
+
+
+def _discover_bundled(enabled, disabled):
+    for mod in pkgutil.iter_modules(__path__):
+        name = mod.name
+        if not _should_load(name, enabled, disabled):
+            continue
+        try:
+            importlib.import_module('%s.%s' % (__name__, name))
+        except Exception:
+            continue
+
+
+def _discover_entry_points(enabled, disabled):
+    if importlib_metadata is None:  # pragma: no cover
+        return
+    try:
+        eps = importlib_metadata.entry_points()
+        if hasattr(eps, 'select'):
+            eps = eps.select(group='sqlparse.plugins')
+        else:  # pragma: no cover - older importlib_metadata API
+            eps = eps.get('sqlparse.plugins', [])
+    except Exception:  # pragma: no cover
+        return
+    for ep in eps:
+        name = ep.name
+        if not _should_load(name, enabled, disabled):
+            continue
+        try:
+            plugin = ep.load()
+        except Exception:
+            continue
+        register_plugin(name, plugin)
+
+
+def _ensure_plugins_loaded():
+    global _discovered
+    if _discovered:
+        return
+    _discovered = True
+    enabled = set(filter(None, os.environ.get('SQLPARSE_ENABLED_PLUGINS', '').split(',')))
+    disabled = set(filter(None, os.environ.get('SQLPARSE_DISABLED_PLUGINS', '').split(',')))
+    _discover_bundled(enabled, disabled)
+    _discover_entry_points(enabled, disabled)
+
+
 def get_plugin(name):
     """Return the plugin class registered under *name* or *None*.
 
     Parameters are intentionally simple for compatibility with Python 3.2.5.
     """
+    _ensure_plugins_loaded()
     cls = _registry.get(name)
     if cls is None:
         try:
-            __import__('sqlparse.plugins.{0}'.format(name))
+            importlib.import_module('sqlparse.plugins.{0}'.format(name))
         except Exception:
             return None
         cls = _registry.get(name)
@@ -46,26 +115,5 @@ def get_plugin(name):
 
 def available_plugins():
     """Return an iterable of registered plugin names."""
+    _ensure_plugins_loaded()
     return _registry.keys()
-
-
-# Import bundled plugins so that they register themselves with the registry.
-# Each plugin uses the register_plugin decorator at import time.
-try:  # pragma: no cover - import side effects are tested elsewhere
-    from . import blocks  # noqa: F401
-    from . import case_expr  # noqa: F401
-    from . import clauses  # noqa: F401
-    from . import comments  # noqa: F401
-    from . import cte  # noqa: F401
-    from . import create_table  # noqa: F401
-    from . import dialect_strictness  # noqa: F401
-    from . import joins  # noqa: F401
-    from . import list_controls  # noqa: F401
-    from . import penalties  # noqa: F401
-    from . import predicates  # noqa: F401
-    from . import spacing_casing  # noqa: F401
-    from . import subqueries  # noqa: F401
-except Exception:
-    # If a plugin fails to import we simply skip registration to keep
-    # compatibility with minimal environments.
-    pass

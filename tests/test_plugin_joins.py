@@ -4,7 +4,6 @@ import sqlparse
 import warnings
 
 from sqlparse import plugins
-import sqlparse.plugins.joins  # ensure registration
 
 
 def run_plugin(sql, opts):

@@ -1,4 +1,3 @@
-import sqlparse.plugins.clauses  # noqa: F401
 from sqlparse import plugins
 
 

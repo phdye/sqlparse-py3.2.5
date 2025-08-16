@@ -45,3 +45,7 @@ Tracker = "https://github.com/andialbrecht/sqlparse/issues"
 [project.scripts]
 sqlformat = "sqlparse.__main__:main"
 
+[project.entry-points."sqlparse.plugins"]
+# Entry points allow third-party packages to register formatter plugins.
+# Built-in plugins are discovered automatically and do not need to be listed.
+

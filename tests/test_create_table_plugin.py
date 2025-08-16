@@ -3,8 +3,6 @@ from sqlparse import plugins
 
 
 def get_plugin():
-    # ensure module import registers plugin
-    import sqlparse.plugins.create_table  # noqa: F401
     cls = plugins.get_plugin('create_table')
     return cls()
 
