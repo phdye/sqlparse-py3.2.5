@@ -1,0 +1,177 @@
+#!/usr/bin/env python3
+
+import argparse
+import subprocess
+import sys
+from pathlib import Path
+from shutil import move
+
+SOURCE_PATH = Path("/dn/errors.txt")
+ISSUE_ROOT = Path("issue")
+VERSION = "1.2.0"
+
+USAGE = 'Usage:\n  erradd [<name>]\n  erradd --last [<name>]\n  erradd (-h | --help)\n  erradd --version\n\nOptions:\n  -h --help     Show this help message and exit.\n  --version     Show version and exit.\n  --last        Display "Resolve this error : issue/<name>/<NNN>.txt" for the latest file and exit.\n'
+
+def run(cmd, cwd=None):
+    result = subprocess.run(cmd, cwd=cwd, text=True, capture_output=True)
+    if result.returncode != 0:
+        sys.stderr.write(result.stderr)
+        raise SystemExit(result.returncode)
+    return result.stdout.strip()
+
+def get_current_branch() -> str:
+    return run(["git", "rev-parse", "--abbrev-ref", "HEAD"])
+
+def next_unused_number(dir_path: Path, width: int = 3) -> str:
+    dir_path.mkdir(parents=True, exist_ok=True)
+    used = set()
+    for p in dir_path.glob("*.txt"):
+        try:
+            num = int(p.stem)
+            used.add(num)
+        except ValueError:
+            continue
+    n = 1
+    while n in used:
+        n += 1
+    return f"{n:0{width}d}".format(n=n, width=width)
+
+def latest_existing_number(dir_path: Path):
+    max_n = None
+    for p in dir_path.glob("*.txt"):
+        try:
+            num = int(p.stem)
+        except ValueError:
+            continue
+        if max_n is None or num > max_n:
+            max_n = num
+    return max_n
+
+def _copy_to_clipboard(msg: str) -> bool:
+    """Try a few common clipboard mechanisms; never raise on failure."""
+    # 1) /dev/clipboard (MSYS2/Git Bash/WSL integrations)
+    try:
+        clip_dev = Path("/dev/clipboard")
+        if clip_dev.exists():
+            # Try plain open/write first (works for device nodes)
+            try:
+                with open("/dev/clipboard", "w", encoding="utf-8", errors="ignore") as f:
+                    f.write(msg)
+                    return True
+            except Exception:
+                # Fallback to write_text (may also work)
+                try:
+                    clip_dev.write_text(msg)
+                    return True
+                except Exception:
+                    pass
+    except Exception:
+        pass
+
+    # 2) macOS pbcopy
+    try:
+        import subprocess
+        subprocess.run(["pbcopy"], input=msg, text=True, check=True)
+        return True
+    except Exception:
+        pass
+
+    # 3) Linux wayland or X11 tools if available
+    for cmd in (["wl-copy"], ["xclip", "-selection", "clipboard"], ["xsel", "--clipboard", "--input"]):
+        try:
+            import subprocess
+            subprocess.run(cmd, input=msg, text=True, check=True)
+            return True
+        except Exception:
+            continue
+
+    # 4) Windows / WSL clip.exe
+    try:
+        import subprocess
+        subprocess.run(["clip.exe"], input=msg, text=True, check=True)
+        return True
+    except Exception:
+        pass
+
+    return False
+
+def print_message(path: Path) -> None:
+    # Exact phrasing requested by user:
+    msg = f"Resolve this error : {path.as_posix()}"
+    _copy_to_clipboard(msg)  # best-effort; ignore failures
+    print(f"\n{msg}")
+
+def build_parser():
+    parser = argparse.ArgumentParser(
+        prog="erradd",
+        usage=None,  # We'll show a docopt-like block via description
+        description=USAGE,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        add_help=False,
+    )
+    # Emulate docopt defaults
+    parser.add_argument("-h", "--help", action="help", help="Show this help message and exit.")
+    parser.add_argument("--version", action="version", version=f"erradd {VERSION}", help="Show version and exit.")
+    parser.add_argument("--last", action="store_true", help='Display "Resolve this error : ..." for the latest file and exit.')
+    parser.add_argument("name", nargs="?", help="Issue group name (e.g., wsl-backend). Defaults to current git branch.")
+    return parser
+
+def determine_name(name_opt):
+    if name_opt is not None:
+        return name_opt
+    branch = get_current_branch()
+    if branch == "HEAD":
+        print("ERROR: Detached HEAD state; cannot infer <name>. Please specify it explicitly.", file=sys.stderr)
+        raise SystemExit(2)
+    return branch
+
+def cmd_last(name_opt):
+    name = determine_name(name_opt)
+    issue_dir = ISSUE_ROOT / name
+    latest = latest_existing_number(issue_dir)
+    if latest is None:
+        print(f"ERROR: No files found under {issue_dir.as_posix()}.", file=sys.stderr)
+        raise SystemExit(1)
+    path = issue_dir / f"{latest:03d}.txt"
+    print_message(path)
+
+def cmd_add(name_opt):
+    name = determine_name(name_opt)
+
+    if not SOURCE_PATH.exists():
+        print(f"ERROR: Source file {SOURCE_PATH} does not exist.", file=sys.stderr)
+        raise SystemExit(2)
+
+    issue_dir = ISSUE_ROOT / name
+    next_num = next_unused_number(issue_dir, width=3)
+    dest = issue_dir / f"{next_num}.txt"
+
+    # Move the file
+    move(str(SOURCE_PATH), str(dest))
+    print(f"Moved to {dest}")
+
+    # Stage and commit
+    run(["git", "add", str(dest)])
+    commit_msg = f"add {dest.as_posix()}"
+    run(["git", "commit", "-m", commit_msg])
+    print(f"Committed with message: {commit_msg}")
+
+    # Determine branch and push
+    branch = get_current_branch()
+    run(["git", "push", "origin", branch])
+    print(f"Pushed to origin {branch}")
+
+    # Final required output
+    print_message(dest)
+
+def main(argv=None):
+    parser = build_parser()
+    args = parser.parse_args(argv)
+
+    if args.last:
+        cmd_last(args.name)
+    else:
+        cmd_add(args.name)
+
+if __name__ == "__main__":
+    raise SystemExit(main())
