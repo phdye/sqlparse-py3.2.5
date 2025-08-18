@@ -1,0 +1,5 @@
+Script started on Mon Aug 18 10:13:48 2025
++ shift-ext-to-end pc 002/version
+  File "/home/phdye/scripts/shift-ext-to-end", line 4
+SyntaxError: Non-ASCII character '\xe2' in file /home/phdye/scripts/shift-ext-to-end on line 5, but no encoding declared; see http://www.python.org/peps/pep-0263.html for details
+
