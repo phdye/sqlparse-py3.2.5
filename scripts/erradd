@@ -1,105 +1,119 @@
 #!/usr/bin/env python3
 
 import argparse
+import os
 import subprocess
 import sys
-from pathlib import Path
 from shutil import move
 
-SOURCE_PATH = Path("/dn/errors.txt")
-ISSUE_ROOT = Path("issue")
+SOURCE_PATH = "/dn/errors.txt"
+ISSUE_ROOT = "issue"
 VERSION = "1.2.0"
 
 USAGE = 'Usage:\n  erradd [<name>]\n  erradd --last [<name>]\n  erradd (-h | --help)\n  erradd --version\n\nOptions:\n  -h --help     Show this help message and exit.\n  --version     Show version and exit.\n  --last        Display "Resolve this error : issue/<name>/<NNN>.txt" for the latest file and exit.\n'
 
 def run(cmd, cwd=None):
-    result = subprocess.run(cmd, cwd=cwd, text=True, capture_output=True)
-    if result.returncode != 0:
-        sys.stderr.write(result.stderr)
-        raise SystemExit(result.returncode)
-    return result.stdout.strip()
+    proc = subprocess.Popen(cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    out, err = proc.communicate()
+    if proc.returncode != 0:
+        if err:
+            try:
+                sys.stderr.write(err.decode("utf-8", "ignore"))
+            except Exception:
+                sys.stderr.write(str(err))
+        raise SystemExit(proc.returncode)
+    return out.decode("utf-8", "ignore").strip()
 
-def get_current_branch() -> str:
+def get_current_branch():
     return run(["git", "rev-parse", "--abbrev-ref", "HEAD"])
 
-def next_unused_number(dir_path: Path, width: int = 3) -> str:
-    dir_path.mkdir(parents=True, exist_ok=True)
+def next_unused_number(dir_path, width=3):
+    if not os.path.isdir(dir_path):
+        os.makedirs(dir_path)
     used = set()
-    for p in dir_path.glob("*.txt"):
-        try:
-            num = int(p.stem)
-            used.add(num)
-        except ValueError:
-            continue
+    for filename in os.listdir(dir_path):
+        if filename.endswith('.txt'):
+            try:
+                num = int(os.path.splitext(filename)[0])
+                used.add(num)
+            except Exception:
+                continue
     n = 1
     while n in used:
         n += 1
-    return f"{n:0{width}d}".format(n=n, width=width)
+    return ("%%0%dd" % width) % n
 
-def latest_existing_number(dir_path: Path):
+def latest_existing_number(dir_path):
+    if not os.path.isdir(dir_path):
+        return None
     max_n = None
-    for p in dir_path.glob("*.txt"):
+    for filename in os.listdir(dir_path):
+        if not filename.endswith('.txt'):
+            continue
         try:
-            num = int(p.stem)
-        except ValueError:
+            num = int(os.path.splitext(filename)[0])
+        except Exception:
             continue
         if max_n is None or num > max_n:
             max_n = num
     return max_n
 
-def _copy_to_clipboard(msg: str) -> bool:
+def _copy_to_clipboard(msg):
     """Try a few common clipboard mechanisms; never raise on failure."""
-    # 1) /dev/clipboard (MSYS2/Git Bash/WSL integrations)
     try:
-        clip_dev = Path("/dev/clipboard")
-        if clip_dev.exists():
-            # Try plain open/write first (works for device nodes)
+        clip_dev = "/dev/clipboard"
+        if os.path.exists(clip_dev):
             try:
-                with open("/dev/clipboard", "w", encoding="utf-8", errors="ignore") as f:
-                    f.write(msg)
-                    return True
+                f = open(clip_dev, 'w')
+                f.write(msg)
+                f.close()
+                return True
             except Exception:
-                # Fallback to write_text (may also work)
                 try:
-                    clip_dev.write_text(msg)
+                    f = open(clip_dev, 'wb')
+                    f.write(msg.encode('utf-8'))
+                    f.close()
                     return True
                 except Exception:
                     pass
     except Exception:
         pass
 
-    # 2) macOS pbcopy
     try:
-        import subprocess
-        subprocess.run(["pbcopy"], input=msg, text=True, check=True)
-        return True
+        proc = subprocess.Popen(["pbcopy"], stdin=subprocess.PIPE)
+        proc.communicate(msg.encode('utf-8'))
+        if proc.returncode == 0:
+            return True
     except Exception:
         pass
 
-    # 3) Linux wayland or X11 tools if available
     for cmd in (["wl-copy"], ["xclip", "-selection", "clipboard"], ["xsel", "--clipboard", "--input"]):
         try:
-            import subprocess
-            subprocess.run(cmd, input=msg, text=True, check=True)
-            return True
+            proc = subprocess.Popen(cmd, stdin=subprocess.PIPE)
+            proc.communicate(msg.encode('utf-8'))
+            if proc.returncode == 0:
+                return True
         except Exception:
             continue
 
-    # 4) Windows / WSL clip.exe
     try:
-        import subprocess
-        subprocess.run(["clip.exe"], input=msg, text=True, check=True)
-        return True
+        proc = subprocess.Popen(["clip.exe"], stdin=subprocess.PIPE)
+        proc.communicate(msg.encode('utf-8'))
+        if proc.returncode == 0:
+            return True
     except Exception:
         pass
 
     return False
 
-def print_message(path: Path) -> None:
-    # Exact phrasing requested by user:
-    msg = f"Resolve this error : {path.as_posix()}"
-    _copy_to_clipboard(msg)  # best-effort; ignore failures
-    print(f"\n{msg}")
+def _as_posix(path):
+    return path.replace(os.sep, '/')
+
+
+def print_message(path):
+    msg = "Resolve this error : %s" % _as_posix(path)
+    _copy_to_clipboard(msg)
+    print("\n%s" % msg)
 
 def build_parser():
     parser = argparse.ArgumentParser(
@@ -111,7 +125,7 @@ def build_parser():
     )
     # Emulate docopt defaults
     parser.add_argument("-h", "--help", action="help", help="Show this help message and exit.")
-    parser.add_argument("--version", action="version", version=f"erradd {VERSION}", help="Show version and exit.")
+    parser.add_argument("--version", action="version", version="erradd %s" % VERSION, help="Show version and exit.")
     parser.add_argument("--last", action="store_true", help='Display "Resolve this error : ..." for the latest file and exit.')
     parser.add_argument("name", nargs="?", help="Issue group name (e.g., wsl-backend). Defaults to current git branch.")
     return parser
@@ -127,41 +141,37 @@ def determine_name(name_opt):
 
 def cmd_last(name_opt):
     name = determine_name(name_opt)
-    issue_dir = ISSUE_ROOT / name
+    issue_dir = os.path.join(ISSUE_ROOT, name)
     latest = latest_existing_number(issue_dir)
     if latest is None:
-        print(f"ERROR: No files found under {issue_dir.as_posix()}.", file=sys.stderr)
+        print("ERROR: No files found under %s." % _as_posix(issue_dir), file=sys.stderr)
         raise SystemExit(1)
-    path = issue_dir / f"{latest:03d}.txt"
+    path = os.path.join(issue_dir, "%03d.txt" % latest)
     print_message(path)
 
 def cmd_add(name_opt):
     name = determine_name(name_opt)
 
-    if not SOURCE_PATH.exists():
-        print(f"ERROR: Source file {SOURCE_PATH} does not exist.", file=sys.stderr)
+    if not os.path.exists(SOURCE_PATH):
+        print("ERROR: Source file %s does not exist." % SOURCE_PATH, file=sys.stderr)
         raise SystemExit(2)
 
-    issue_dir = ISSUE_ROOT / name
+    issue_dir = os.path.join(ISSUE_ROOT, name)
     next_num = next_unused_number(issue_dir, width=3)
-    dest = issue_dir / f"{next_num}.txt"
+    dest = os.path.join(issue_dir, "%s.txt" % next_num)
 
-    # Move the file
-    move(str(SOURCE_PATH), str(dest))
-    print(f"Moved to {dest}")
+    move(SOURCE_PATH, dest)
+    print("Moved to %s" % dest)
 
-    # Stage and commit
-    run(["git", "add", str(dest)])
-    commit_msg = f"add {dest.as_posix()}"
+    run(["git", "add", dest])
+    commit_msg = "add %s" % _as_posix(dest)
     run(["git", "commit", "-m", commit_msg])
-    print(f"Committed with message: {commit_msg}")
+    print("Committed with message: %s" % commit_msg)
 
-    # Determine branch and push
     branch = get_current_branch()
     run(["git", "push", "origin", branch])
-    print(f"Pushed to origin {branch}")
+    print("Pushed to origin %s" % branch)
 
-    # Final required output
     print_message(dest)
 
 def main(argv=None):
