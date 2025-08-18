@@ -32,19 +32,21 @@ Description:
 
 Examples:
   "report.txt~backup"  ->  "report~backup.txt"
-  "log.TXT-2024" (with -i) -> "log-2024.TXT"
-"""
+  "log.TXT-2012" (with -i) -> "log-2012.TXT"
 
-from __future__ import annotations
+Notes for Python 3.2.5 compatibility:
+  * No f-strings or type hints are used.
+  * No pathlib; paths handled with os.path.
+  * No os.replace; overwrite is implemented by removing an existing destination file when --overwrite is set.
+"""
 
 import argparse
 import os
 import re
-from pathlib import Path
-from typing import Optional, Tuple
+import sys
 
 
-def build_parser() -> argparse.ArgumentParser:
+def build_parser():
     parser = argparse.ArgumentParser(
         prog="shift-ext-to-end",
         description="Move an inlined extension to the end of filenames.",
@@ -57,8 +59,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "target_dir",
         nargs="?",
-        default=Path("."),
-        type=Path,
+        default='.',
         help="Directory to walk (searched top-down)",
     )
 
@@ -72,58 +73,75 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def compile_pattern(ext: str, ignore_case: bool) -> re.Pattern[str]:
+def compile_pattern(ext, ignore_case):
     # Match any filename containing ".ext" followed by a non-word char and then more text (not at end)
     # Capture groups: before, after. We use a greedy 'before' so we move the *last* such occurrence.
     flags = re.IGNORECASE if ignore_case else 0
     ext_esc = re.escape(ext)
-    pattern = rf"^(?P<before>.*)\.{ext_esc}(?P<sep>\W)(?P<after>.+)$"
+    pattern = r"^(?P<before>.*)\." + ext_esc + r"(?P<sep>\W)(?P<after>.+)$"
     return re.compile(pattern, flags)
 
 
-def plan_new_name(name: str, ext: str, pat: re.Pattern[str]) -> Optional[Tuple[str, str]]:
+def plan_new_name(name, ext, pat):
     """Return (old_name, new_name) if a rename is needed, else None."""
     m = pat.search(name)
     if not m:
         return None
     before = m.group("before")
     after = m.group("after")
-    new_name = f"{before}{after}.{ext}"
+    new_name = "%s%s.%s" % (before, after, ext)
     if new_name == name:
         return None
-    return name, new_name
+    return (name, new_name)
 
 
-def log(msg: str, *, quiet: bool, verbose: int, level: int = 0) -> None:
+def log(msg, quiet, verbose, level=0):
     if quiet:
         return
     if verbose >= level:
-        print(msg)
+        sys.stdout.write(msg + "\n")
+        sys.stdout.flush()
 
 
-def rename_file(src: Path, dst: Path, *, dry_run: bool, overwrite: bool) -> None:
-    dst_parent = dst.parent
-    dst_parent.mkdir(parents=True, exist_ok=True)
+def ensure_parent_dir(path):
+    parent = os.path.dirname(path)
+    if parent and not os.path.exists(parent):
+        os.makedirs(parent)
+
+
+def rename_file(src, dst, dry_run, overwrite):
+    ensure_parent_dir(dst)
     if dry_run:
-        print(f"DRY-RUN: {src} -> {dst}")
+        sys.stdout.write("DRY-RUN: %s -> %s\n" % (src, dst))
         return
-    if overwrite:
-        os.replace(src, dst)  # atomic where possible; overwrites if needed
-    else:
-        if dst.exists():
-            raise FileExistsError(f"Destination exists: {dst}")
-        src.rename(dst)
+
+    if os.path.exists(dst):
+        if overwrite:
+            # Only remove if it's a file; otherwise raise
+            if os.path.isdir(dst):
+                raise OSError("Destination is a directory: %s" % dst)
+            try:
+                os.remove(dst)
+            except OSError as e:
+                raise OSError("Could not remove existing destination %s: %s" % (dst, e))
+        else:
+            raise OSError("Destination exists: %s" % dst)
+
+    try:
+        os.rename(src, dst)
+    except OSError as e:
+        raise OSError("Could not rename %s -> %s: %s" % (src, dst, e))
 
 
-def main(argv: Optional[list[str]] = None) -> int:
+def main(argv=None):
     parser = build_parser()
     args = parser.parse_args(argv)
 
-    ext = args.ext.lstrip(".")  # tolerate accidental leading dot
-    target_dir: Path = args.target_dir.resolve()
+    ext = args.ext.lstrip('.')  # tolerate accidental leading dot
+    target_dir = os.path.abspath(args.target_dir)
 
-    if not target_dir.exists() or not target_dir.is_dir():
-        parser.error(f"Target directory does not exist or is not a directory: {target_dir}")
+    if not os.path.isdir(target_dir):
+        parser.error("Target directory does not exist or is not a directory: %s" % target_dir)
 
     pat = compile_pattern(ext, args.ignore_case)
 
@@ -132,10 +150,9 @@ def main(argv: Optional[list[str]] = None) -> int:
     total_renamed = 0
     total_skipped = 0
 
-    log(f"Walking (top-down) under: {target_dir}", quiet=args.quiet, verbose=args.verbose, level=0)
+    log("Walking (top-down) under: %s" % target_dir, args.quiet, args.verbose, level=0)
 
     for root, _dirs, files in os.walk(target_dir, topdown=True):
-        root_path = Path(root)
         for fname in files:
             total_examined += 1
             plan = plan_new_name(fname, ext, pat)
@@ -144,30 +161,29 @@ def main(argv: Optional[list[str]] = None) -> int:
             total_matched += 1
             old_name, new_name = plan
 
-            src = root_path / old_name
-            dst = root_path / new_name
+            src = os.path.join(root, old_name)
+            dst = os.path.join(root, new_name)
 
-            log(f"Match: {src.name}  ->  {dst.name}", quiet=args.quiet, verbose=args.verbose, level=0)
+            log("Match: %s  ->  %s" % (old_name, new_name), args.quiet, args.verbose, level=0)
 
             try:
                 rename_file(src, dst, dry_run=args.dry_run, overwrite=args.overwrite)
                 total_renamed += 1
-            except FileExistsError as e:
-                total_skipped += 1
-                print(f"WARNING: {e}")
             except OSError as e:
                 total_skipped += 1
-                print(f"ERROR: Could not rename {src} -> {dst}: {e}")
+                sys.stderr.write("WARNING: %s\n" % (e,))
+                sys.stderr.flush()
 
     if not args.quiet:
-        print(
-            "\nSummary: examined={}, matched={}, renamed={}, skipped={}".format(
+        sys.stdout.write(
+            "\nSummary: examined=%d, matched=%d, renamed=%d, skipped=%d\n" % (
                 total_examined, total_matched, total_renamed, total_skipped
             )
         )
+        sys.stdout.flush()
 
     return 0 if total_skipped == 0 else 1
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    sys.exit(main())
