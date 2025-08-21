@@ -1,16 +1,32 @@
-# ou-diag.py
-# Diagnostic script for Oracle ODP.NET (Oracle.DataAccess) binding/loader issues
-#
-# Usage examples:
-#   python ou-diag.py --exe "C:\Path\To\App.exe"
-#   python ou-diag.py --config "C:\Path\To\App.exe.config" --oracle-dll "C:\Oracle\...\Oracle.DataAccess.dll"
-#   python ou-diag.py --instant-client-dir "C:\Oracle\instantclient_19_17"
-#
-# Notes:
-# - Works WITHOUT admin rights.
-# - Uses optional 'pythonnet' to attempt real .NET loads if available. Otherwise, performs static checks.
-# - Attempts to load oci.dll via ctypes to verify native client presence/bitness.
-#
+#!/usr/bin/env python3
+"""
+Oracle Utilities ODP.NET diagnostic for Oracle.DataAccess (ou-diag.py)
+
+This script checks everything needed to run Oracle.DataAccess without admin rights:
+- app/web config: bindingRedirect, codeBase, DbProviderFactories entry
+- managed DLL availability and version
+- native Instant Client presence (oci.dll) and bitness hints
+- optional runtime tests via pythonnet: assembly load, OracleClientFactory.Instance,
+  DbProviderFactories.GetFactory("Oracle.DataAccess.Client")
+
+Usage examples:
+  python ou-diag.py --exe "C:\\Path\\To\\App.exe"
+  python ou-diag.py --config "C:\\Path\\To\\App.exe.config" --oracle-dll "C:\\Oracle\\...\\Oracle.DataAccess.dll"
+  python ou-diag.py --instant-client-dir "C:\\Oracle\\instantclient_19_17"
+
+Example full command:
+  python ou-diag.py --config "C:\\Apps\\OU\\Bin\\MyApp.exe.config" \
+                    --oracle-dll "C:\\Oracle\\Ora12_32\\client\\odp.net\\bin\\2.x\\Oracle.DataAccess.dll" \
+                    --instant-client-dir "C:\\Oracle\\instantclient_19_23" \
+                    --verbose
+
+Exit codes:
+  0 = No blocking issues detected
+  1 = Errors encountered
+  2 = Likely root causes identified
+ 99 = Fatal exception in the diagnostic itself
+"""
+
 import argparse
 import ctypes
 import os
@@ -44,7 +60,7 @@ def parse_args():
     g.add_argument("--config", help="Path to app.exe.config (or web.config)")
     g.add_argument("--exe", help="Path to application EXE to derive <exe>.config")
     p.add_argument("--oracle-dll", help="Explicit path to Oracle.DataAccess.dll (managed ODP.NET)")
-    p.add_argument("--instant-client-dir", help="Folder containing native DLLs (oci.dll, etc.). Will be prepended to PATH at runtime for this process.")
+    p.add_argument("--instant-client-dir", help="Folder with native DLLs (oci.dll, etc.). Will be prepended to PATH for this process.")
     p.add_argument("--verbose", action="store_true", help="Verbose output")
     return p.parse_args()
 
@@ -93,14 +109,13 @@ def read_config_xml(cfg_path: Path):
                 result["codeBase_version"] = cb.get("version")
     # DbProviderFactories entry
     fac = tree.find(".//system.data/DbProviderFactories/add")
-    if fac is not None:
-        if fac.get("invariant") == "Oracle.DataAccess.Client":
-            result["provider_present"] = True
-            result["factory_type"] = fac.get("type")
-            # Extract version from type string: "..., Oracle.DataAccess, Version=2.122.1.0, Culture=..."
-            m = re.search(r"Version=([\d\.]+)", result["factory_type"] or "")
-            if m:
-                result["factory_version"] = m.group(1)
+    if fac is not None and fac.get("invariant") == "Oracle.DataAccess.Client":
+        result["provider_present"] = True
+        result["factory_type"] = fac.get("type")
+        # Extract version from type string: ", Oracle.DataAccess, Version=2.122.1.0, ..."
+        m = re.search(r"Version=([\d\.]+)", result["factory_type"] or "")
+        if m:
+            result["factory_version"] = m.group(1)
     return tree, result
 
 def uri_to_path(uri: str):
@@ -116,16 +131,11 @@ def uri_to_path(uri: str):
     return Path(uri)
 
 def get_file_version_win(path: Path):
-    """
-    Try to read Windows file version info via ctypes.
-    Returns 'major.minor.build.revision' or None.
-    """
+    """Return Windows file version like 'major.minor.build.revision', or None."""
     try:
-        # GetFileVersionInfoSizeW
         size = ctypes.windll.version.GetFileVersionInfoSizeW(str(path), None)
         if not size:
             return None
-        import struct
         res = ctypes.create_string_buffer(size)
         if not ctypes.windll.version.GetFileVersionInfoW(str(path), 0, size, res):
             return None
@@ -133,11 +143,8 @@ def get_file_version_win(path: Path):
         u_ptr = ctypes.c_void_p()
         if not ctypes.windll.version.VerQueryValueW(res, "\\", ctypes.byref(u_ptr), ctypes.byref(u_len)):
             return None
-        # VS_FIXEDFILEINFO structure
-        # Read as two DWORDs for version MS and LS
         buf = (ctypes.c_byte * u_len.value).from_address(u_ptr.value)
         data = bytes(buf[:u_len.value])
-        # fixed offsets: https://learn.microsoft.com/windows/win32/api/verrsrc/ns-verrsrc-vs_fixedfileinfo
         dwFileVersionMS = int.from_bytes(data[40:44], "little")
         dwFileVersionLS = int.from_bytes(data[44:48], "little")
         major = (dwFileVersionMS >> 16) & 0xFFFF
@@ -149,10 +156,7 @@ def get_file_version_win(path: Path):
         return None
 
 def try_load_oci(instant_dir=None):
-    """
-    Try to load oci.dll to verify native Oracle client availability.
-    Return (ok, message)
-    """
+    """Try to load oci.dll to verify native Oracle client availability. Return (ok, message)."""
     try:
         if instant_dir and os.path.isdir(instant_dir):
             os.environ["PATH"] = instant_dir + os.pathsep + os.environ.get("PATH", "")
@@ -186,12 +190,7 @@ def check_bitness_hints(oracle_dll_path: Path):
     return hints
 
 def try_pythonnet_load(oracle_dll_path: Path):
-    """
-    If pythonnet is available, attempt to:
-      - Load Oracle.DataAccess (from GAC or provided path)
-      - Obtain OracleClientFactory.Instance
-      - Use DbProviderFactories if config registers it
-    """
+    """Attempt real .NET loads using pythonnet (if installed)."""
     try:
         import clr  # type: ignore
         from System import AppDomain
@@ -238,7 +237,7 @@ def try_pythonnet_load(oracle_dll_path: Path):
     except Exception as e:
         data["errors"].append(f"Preload System.Data failed: {e}")
 
-    # Attempt Assembly.Load by name (falls back to GAC), else explicit path
+    # Attempt Assembly.Load by name (GAC), else explicit path
     asm = None
     try:
         asm = Assembly.Load("Oracle.DataAccess")
@@ -253,7 +252,7 @@ def try_pythonnet_load(oracle_dll_path: Path):
         data["assembly_loaded"] = True
         data["assembly_fullname"] = str(asm.FullName)
 
-    # Try OracleClientFactory.Instance
+    # OracleClientFactory.Instance
     try:
         if asm is not None:
             t = asm.GetType("Oracle.DataAccess.Client.OracleClientFactory", False)
@@ -268,12 +267,11 @@ def try_pythonnet_load(oracle_dll_path: Path):
     except Exception as e:
         data["errors"].append(f"OracleClientFactory.Instance failed: {e}")
 
-    # Try DbProviderFactories.GetFactory
+    # DbProviderFactories
     try:
         fac = DbProviderFactories.GetFactory("Oracle.DataAccess.Client")
         if fac is not None:
             data["dbprovider_factory"] = True
-            # enrich details
             data["factory_fullname"] = data["factory_fullname"] or str(fac.GetType().FullName)
             data["factory_asm_fullname"] = data["factory_asm_fullname"] or str(fac.GetType().Assembly.FullName)
     except Exception as e:
@@ -332,7 +330,6 @@ def main():
             oracle_dll_path = uri_to_path(config_info["codeBase_href"])
             ok(f"Oracle DLL inferred from codeBase: {oracle_dll_path}")
         else:
-            # try next to EXE
             if args.exe:
                 candidate = Path(args.exe).with_name("Oracle.DataAccess.dll")
                 if candidate.exists():
@@ -341,4 +338,123 @@ def main():
 
     if oracle_dll_path and not oracle_dll_path.exists():
         error(f"Oracle.DataAccess.dll path not found: {oracle_dll_path}")
+        oracle_dll_path = None
 
+    # Step 4: version checks on Oracle.DataAccess.dll file
+    if oracle_dll_path and oracle_dll_path.exists():
+        fv = get_file_version_win(oracle_dll_path)
+        if fv:
+            ok(f"Oracle.DataAccess.dll file version: {fv}")
+            br_new = config_info.get("bindingRedirect_new")
+            fac_ver = config_info.get("factory_version")
+            if br_new and dotted_to_tuple(fv) != dotted_to_tuple(br_new):
+                warn(f"File version ({fv}) differs from bindingRedirect newVersion ({br_new})")
+            if fac_ver and dotted_to_tuple(fv) != dotted_to_tuple(fac_ver):
+                warn(f"File version ({fv}) differs from DbProviderFactories type Version ({fac_ver})")
+        else:
+            warn("Could not read file version of Oracle.DataAccess.dll (non-Windows or missing version info)")
+
+    # Step 5: bitness hints
+    for hint in check_bitness_hints(oracle_dll_path):
+        add("Bitness", hint)
+
+    # Step 6: try loading oci.dll (native)
+    oci_ok, oci_msg = try_load_oci(args.instant_client_dir)
+    (ok if oci_ok else warn)(oci_msg)
+
+    # Step 7: pythonnet-based runtime tests
+    pn = try_pythonnet_load(oracle_dll_path)
+    if pn.get("pythonnet"):
+        if pn.get("assembly_loaded"):
+            ok(f".NET: Oracle.DataAccess loaded: {pn.get('assembly_fullname')}")
+        else:
+            warn(".NET: Oracle.DataAccess NOT loaded (GAC/path/resolver).")
+
+        if pn.get("factory_instance"):
+            ok(".NET: OracleClientFactory.Instance retrieved")
+        else:
+            warn(".NET: OracleClientFactory.Instance not available (assembly loaded: %s)" % pn.get("assembly_loaded"))
+
+        if pn.get("dbprovider_factory"):
+            ok(".NET: DbProviderFactories.GetFactory('Oracle.DataAccess.Client') succeeded")
+        else:
+            warn(".NET: DbProviderFactories.GetFactory failed (missing app-local provider entry or machine.config registration)")
+
+        for e in pn.get("errors", []):
+            add("pythonnet", f"{e}")
+    else:
+        add("pythonnet", "Not installed; skipping runtime checks. Install with: pip install pythonnet")
+
+    # Step 8: derive likely root causes
+    root_causes = []
+
+    if not oracle_dll_path:
+        root_causes.append("Managed ODP.NET (Oracle.DataAccess.dll) not discoverable: specify --oracle-dll or add codeBase in config, or copy next to EXE.")
+
+    if config_info.get("codeBase_href"):
+        cbp = uri_to_path(config_info["codeBase_href"])
+        if not cbp.exists():
+            root_causes.append("codeBase href points to a non-existent file. Fix href or install ODAC at that path.")
+
+    if not config_info.get("provider_present") and pn.get("pythonnet") and not pn.get("dbprovider_factory"):
+        root_causes.append("DbProviderFactories entry missing. Add <system.data>/<DbProviderFactories> for Oracle.DataAccess.Client in app config.")
+
+    if oracle_dll_path and oracle_dll_path.exists():
+        dll_ver = get_file_version_win(oracle_dll_path) or ""
+        if config_info.get("bindingRedirect_new") and dll_ver and dotted_to_tuple(dll_ver) != dotted_to_tuple(config_info["bindingRedirect_new"]):
+            root_causes.append("bindingRedirect newVersion does not match the actual Oracle.DataAccess.dll file version.")
+        if config_info.get("factory_version") and dll_ver and dotted_to_tuple(dll_ver) != dotted_to_tuple(config_info["factory_version"]):
+            root_causes.append("DbProviderFactories 'type' Version does not match the actual Oracle.DataAccess.dll file version.")
+
+    if not oci_ok:
+        root_causes.append("Native Oracle Client (oci.dll) not found or failed to load. Ensure Instant Client/bin is on PATH and bitness matches the app.")
+
+    if pn.get("pythonnet") and not pn.get("assembly_loaded"):
+        root_causes.append("Runtime could not load Oracle.DataAccess (not in GAC and no valid codeBase or local copy).")
+
+    if pn.get("pythonnet") and pn.get("assembly_loaded") and not pn.get("factory_instance"):
+        root_causes.append("OracleClientFactory.Instance not available. Version mismatch or corrupted assembly.")
+
+    # Step 9: print report
+    print("="*70)
+    print("Oracle Utilities ODP.NET Diagnostic (ou-diag.py)")
+    print("="*70)
+    for r in RESULTS:
+        print("[OK]   " + r)
+    for w in WARNINGS:
+        print("[WARN] " + w)
+    if args.verbose:
+        for d in DETAILS:
+            print("[INFO] " + d)
+    for e in ERRORS:
+        print("[ERR]  " + e)
+
+    print("-"*70)
+    if root_causes:
+        print("LIKELY ROOT CAUSES:")
+        for rc in root_causes:
+            print("  - " + rc)
+        exit_code = 2
+    elif ERRORS:
+        print("ERRORS encountered; see above.")
+        exit_code = 1
+    else:
+        print("No blocking issues detected. If you're still seeing NullReferenceException, check the connectionStrings name, providerName, and app code paths.")
+        exit_code = 0
+
+    print("-"*70)
+    print("Tips:")
+    print(" - Use --config or --exe so the script can inspect bindingRedirect/codeBase/provider entries.")
+    print(" - Use --oracle-dll to point to the exact Oracle.DataAccess.dll you want to test.")
+    print(" - Use --instant-client-dir to temporarily prepend native client folder to PATH.")
+    print(" - Install 'pythonnet' to enable runtime loader tests: pip install pythonnet")
+    sys.exit(exit_code)
+
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception as ex:
+        print("[FATAL] " + str(ex))
+        if "--verbose" in sys.argv:
+            traceback.print_exc()
+        sys.exit(99)
