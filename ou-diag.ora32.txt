@@ -1,0 +1,30 @@
+Script started on Tue Aug 26 12:37:03 2025
+======================================================================
+Oracle Utilities ODP.NET Diagnostic (ou-diag.py)
+======================================================================
+[OK]   OS: Windows 11 | Python: 3.13.2 | Arch: 64bit
+[OK]   Config path: datamgr.exe.config
+[OK]   bindingRedirect present: old='0.0.0.0-2.122.1.0' -> new='2.122.1.0'
+[OK]   codeBase href: file:///C:/Oracle/Ora12_32/client/odp.net/bin/2.x/Oracle.DataAccess.dll -> C:\Oracle\Ora12_32\client\odp.net\bin\2.x\Oracle.DataAccess.dll
+[OK]   DbProviderFactories entry for 'Oracle.DataAccess.Client' present
+[OK]   Provider 'type' references Version=2.122.1.0
+[OK]   Oracle DLL provided: C:\Oracle\Ora12_32\client\odp.net\bin\2.x\Oracle.DataAccess.dll
+[WARN] Could not read file version of Oracle.DataAccess.dll (non-Windows or missing version info)
+[WARN] oci.dll not found or failed to load: Could not find module 'oci.dll' (or one of its dependencies). Try using the full path with constructor syntax.
+[WARN] pythonnet not available; skipping .NET runtime load tests. (pip install pythonnet)
+[INFO] [ENV] PATH(0..120): C:\-\cygwin\root\usr\local\bin;C:\-\cygwin\root\bin;C:\-\cygwin\root\cygdrive\c\Program Files\Python313\Scripts;C:\-\cyg...
+[INFO] [Bitness] Python process bitness: 64-bit (64bit)
+[INFO] [Bitness] Oracle managed DLL path suggests 32-bit client
+[INFO] [PATH] Prepended instant client dir to PATH: C:\Oracle\Ora12_32
+[INFO] [pythonnet] Not installed; skipping runtime checks. Install with: pip install pythonnet
+----------------------------------------------------------------------
+LIKELY ROOT CAUSES:
+  - Native Oracle Client (oci.dll) not found or failed to load. Ensure Instant Client/bin is on PATH and bitness matches the app.
+----------------------------------------------------------------------
+Tips:
+ - Use --config or --exe so the script can inspect bindingRedirect/codeBase/provider entries.
+ - Use --oracle-dll to point to the exact Oracle.DataAccess.dll you want to test.
+ - Use --instant-client-dir to temporarily prepend native client folder to PATH.
+ - Install 'pythonnet' to enable runtime loader tests: pip install pythonnet
+
+Script done on Tue Aug 26 12:37:05 2025

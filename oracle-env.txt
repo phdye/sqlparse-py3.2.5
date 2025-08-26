@@ -1,0 +1,155 @@
+Script started on Tue Aug 26 12:35:33 2025
+]0;/c/programs/32/Lodestar/Bin
+[32mphdye@XDC-WinLA-009 [33m/c/programs/32/Lodestar/Bin[0m
+$ ls /c/ORale[K[K[K[Kral[Kcle
+Ora12_32  Ora12_64  Ora19_32  instantclient_19_26  network
+]0;/c/programs/32/Lodestar/Bin
+[32mphdye@XDC-WinLA-009 [33m/c/programs/32/Lodestar/Bin[0m
+$ ls /c/Oracle/Ora12_32
+cfgtoollogs  checkpoints  client  diag
+]0;/c/programs/32/Lodestar/Bin
+[32mphdye@XDC-WinLA-009 [33m/c/programs/32/Lodestar/Bin[0m
+$ ls /c/Oracle/Ora12_32/client/
+ASP.NET     cdata	 cv	      env.ora	     inventory	ldap	 odbc	  oramts  precomp   sqlplus   wwg
+OPatch	    cfgtoollogs  dc_ocm       has	     javavm	lib	 odp.net  oui	  racg	    srvm      xdk
+QOpatch     clone	 deinstall    hs	     jdbc	network  oledb	  owm	  rdbms     suptools
+assistants  crs		 diagnostics  install	     jdk	nls	 opmn	  perl	  relnotes  ucp
+bin	    css		 dmu	      instantclient  jlib	oci	 oracore  plsql   slax	    utl
+]0;/c/programs/32/Lodestar/Bin
+[32mphdye@XDC-WinLA-009 [33m/c/programs/32/Lodestar/Bin[0m
+$ ls /c/Oracle/Ora12_32/client/lib
+activation.jar	oracore12.lib	   oralzopro5.a    orapls12.lib  xml.jar	  xmlparserv2_jaxp_services.jar
+facility.lis	oraldapclnt12.a    oramts.lib	   oraxml12.lib  xmlcomp2.jar	  xmlparserv2_sans_jaxp_services.jar
+mail.jar	oraldapclnt12.lib  oramts12.lib    orazip.a	 xmlmesg.jar	  xschema.jar
+orabz2.a	oraldapjclnt12.a   oramysql12.lib  orazlib.a	 xmlparserv2.jar  xsu12.jar
+]0;/c/programs/32/Lodestar/Bin
+[32mphdye@XDC-WinLA-009 [33m/c/programs/32/Lodestar/Bin[0m
+$ ls /c/Oracle/Ora12_32/client/lib[K[K[Kbin
+ORANCRYPT12D.DLL	     extjobo.exe	 omtsreco.exe	      orancrypt12.dll	      oravssmsg.dll
+ORASLAX12.DLL		     extproc.exe	 omtsrecoeentd.dll    orancrypt12_ee.dll.dbl  oravssmsgus.dll
+OraOLEDB12.dll		     genezi.exe		 omtsrecoeente.dll    oranfsodm12.dll	      oravssw.exe
+OraOLEDB12.tlb		     getcrshome.exe	 omtsrecoeentf.dll    orangsmshd12.dll	      orawsec12.dll
+OraOLEDB12d.dll		     heteroxa12.dll	 omtsrecoeventd.dll   oranhost12.dll	      orawsecmsgus.dll
+OraOLEDB12ja.dll	     heteroxa12.sym	 omtsrecoevente.dll   oranipc12.dll	      orawwg.dll
+OraOLEDB12ko.dll	     imp.exe		 omtsrecoevntd.dll    oranjni12.dll	      oraxml.bat
+OraOLEDB12us.dll	     impdp.exe		 omtsrecoevnte.dll    oranl12.dll	      oraxml12.dll
+OraOLEDBgmr12.dll	     launch.exe		 omtsrecoevntf.dll    oranldap12.dll	      oraxsl.bat
+OraOLEDBpus12.dll	     lbuilder.bat	 omtsrecoevnti.dll    oranldapj12.dll	      orazt12.dll
+OraOLEDBrfc12.dll	     lcsscan.exe	 omtsrecoevntja.dll   oranls12.dll	      oraztkg12.dll
+OraOLEDBrmc12.dll	     ldapadd.exe	 omtsrecoevntko.dll   orannmp12.dll	      orclcontainer.bmp
+OraOLEDBrst12.dll	     ldapaddmt.exe	 omtsrecoevntptb.dll  orannzmcs12.dll	      orclcontext.bmp
+OraOLEDButl12.dll	     ldapbind.exe	 omtsrecoevntus.dll   orannzsbb12.dll	      orcldbserver.bmp
+OraOps12.dll		     ldapcompare.exe	 omtsrecoevntzhs.dll  oranro12.dll	      orclnetservice.bmp
+OracleAdNetConnect.exe	     ldapdelete.exe	 omtsrecoevntzht.dll  oransgr12.dll	      orion.exe
+OracleAdNetConnectRCD.dll    ldapmoddn.exe	 omtsrecomsgus.dll    orantcp12.dll	      ott.bat
+OracleAdNetConnectRCE.dll    ldapmodify.exe	 onsclient.dll	      orantcps12.dll	      outline.exe
+OracleAdNetConnectRCF.dll    ldapmodifymt.exe	 onsctl.bat	      orantns12.dll	      owm
+OracleAdNetConnectRCI.dll    ldapsearch.exe	 oraagent12.dll       orantwss12.dll	      owm.cl
+OracleAdNetConnectRCJA.dll   ldifmigrator.bat	 oraagfw12.dll	      oraocci12.dll	      owm2.dll
+OracleAdNetConnectRCKO.dll   libexpat.dll	 oraasmclnt12.dll     oraocr12.dll	      plshprof.exe
+OracleAdNetConnectRCPTB.dll  libexpat.exp	 orabase.exe	      oraocrb12.dll	      proc.exe
+OracleAdNetConnectRCUS.dll   libexpat.lib	 orabaseconfig.exe    oraocrutl12.dll	      procob.exe
+OracleAdNetConnectRCZHS.dll  libexpatMT.lib	 orabasehome.exe      oraodm12.dll	      rconfig.bat
+OracleAdNetTest.exe	     libexpatw.dll	 oracell12.dll	      oraofs.dll	      registerDll.bat
+OracleAdNetTestRCD.dll	     libexpatw.exp	 oracle.key	      oraoledb12e.dll	      registerDll.bat.sbs
+OracleAdNetTestRCE.dll	     libexpatw.lib	 oraclient12.dll      oraoledb12f.dll	      rman.exe
+OracleAdNetTestRCF.dll	     libexpatwMT.lib	 oraclsce12.dll       oraoledb12i.dll	      roohctl.bat
+OracleAdNetTestRCI.dll	     lmsgen.exe		 oraclscred12.dll     oraoledb12ptb.dll       schema.exe
+OracleAdNetTestRCJA.dll      loadjava.bat	 oraclsnsjni12.dll    oraoledb12zhs.dll       schemasync.bat
+OracleAdNetTestRCKO.dll      loadpsp.exe	 oraclsra12.dll       oraoledb12zht.dll       sclsspawn.exe
+OracleAdNetTestRCPTB.dll     lsnodes.exe	 oracommon12.dll      oraons.dll	      selecthome.bat
+OracleAdNetTestRCUS.dll      lsnrctl.exe	 oracore12.dll	      oraonsx.dll	      selecthome.bat.oraoledb
+OracleAdNetTestRCZHS.dll     lxegen.exe		 oradbcfg12.dll       oraoobjlib.dll	      sqlldr.exe
+RemoteExecService.exe	     lxinst.exe		 oraeons.dll	      orapki		      sqlplus.exe
+adrci.exe		     mkstore		 orageneric12.dll     orapki.bat	      sqlplus.sym
+aqxmlctl.bat		     mkstore.bat	 oragns12.dll	      oraplc12.dll	      sqora32.dll
+aqxmlctl.pl		     modifyEMService.pl  oragnsjni12.dll      oraplp12.dll	      sqoras32.dll
+ccme_asym.dll		     ncomp.bat		 orahasgen12.dll      orapls12.dll	      sqresja.dll
+ccme_base.dll		     netca.bat		 orahomeuserctl.bat   orardjni12.dll	      sqresus.dll
+ccme_ecc.dll		     netca.cl		 oraimr12.dll	      oraskjcx12.dll	      srvctl.bat
+ccme_ecc_accel_fips.dll      netca_deinst.bat	 oraipc1.dll	      orasnls12.dll	      statusnc.bat
+corejava.dll		     nid.exe		 orajaxb.bat	      orasql12.dll	      tkprof.exe
+cryptocme.dll		     oci.dll		 orajmisc.dll	      orasql8.dll	      tnnfg.exe.dbl
+cryptocme.sig		     ocijdbc12.dll	 oraldapclnt12.dll    orasrvm12.dll	      tnslsnr.exe
+dbfs_client.exe		     ocijdbc12.sym	 oraldapjclnt12.dll   orasrvmcred12.dll       tnsping.exe
+dbgeu_run_action.pl	     ociw32.dll		 oralxled.dll	      orasrvmhas12.dll	      trcasst.bat
+deploync.bat		     ocopy.exe		 oramql1.dll	      orasrvmocr12.dll	      uidrvci.exe
+dg4pwd.exe		     odisrvreg.bat	 oramts.dll	      orauini12.dll	      umu.bat
+dgmgrl.exe		     oerr.bat		 oramts12.dll	      oraunls12.dll	      unzip.exe
+diagsetup.bat		     oerr.pl		 oramts_deinst.exe    orauts.dll	      wrap.exe
+dropjava.bat		     oidca.bat		 oramtsctl.exe	      orauts.sym	      wrc.exe
+dsml2ldif.exe		     oidprovtool.bat	 oramtsus.dll	      oravsn12.dll	      xml.exe
+elements.exe		     ojvmjava.bat	 oramysql12.dll       oravsn12_cee.dll.dbl    xmlwf.exe
+eusm.bat		     ojvmtc.bat		 oran12.dll	      oravsn12_cse.dll.dbl    zip.exe
+exp.exe			     okdstry.exe	 oranad12.dll	      oravsn12_ee.dll.dbl
+expdp.exe		     okinit.exe		 oranbeq12.dll	      oravsn12_pe.dll.dbl
+extjob.exe		     oklist.exe		 orancds12.dll	      oravsn12_std.dll.dbl
+]0;/c/programs/32/Lodestar/Bin
+[32mphdye@XDC-WinLA-009 [33m/c/programs/32/Lodestar/Bin[0m
+$ ls /c/Oracle/Ora12_32/client/bin[K[K[Kodep.[C[C[1@f[1@i[1@n[1@d[1P[1P /c/Oracle/Ora12_32/client/odep.[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[K[K[Kp.net
+/c/Oracle/Ora12_32/client/odp.net
+/c/Oracle/Ora12_32/client/odp.net/bin
+/c/Oracle/Ora12_32/client/odp.net/bin/2.x
+/c/Oracle/Ora12_32/client/odp.net/bin/2.x/Oracle.DataAccess.dll
+/c/Oracle/Ora12_32/client/odp.net/bin/2.x/OraProvCfg.exe
+/c/Oracle/Ora12_32/client/odp.net/bin/4
+/c/Oracle/Ora12_32/client/odp.net/bin/4/EF6
+/c/Oracle/Ora12_32/client/odp.net/bin/4/EF6/Oracle.DataAccess.EntityFramework.dll
+/c/Oracle/Ora12_32/client/odp.net/bin/4/Oracle.DataAccess.dll
+/c/Oracle/Ora12_32/client/odp.net/bin/4/OraProvCfg.exe
+/c/Oracle/Ora12_32/client/odp.net/doc
+/c/Oracle/Ora12_32/client/odp.net/doc/readme.htm
+/c/Oracle/Ora12_32/client/odp.net/managed
+/c/Oracle/Ora12_32/client/odp.net/managed/common
+/c/Oracle/Ora12_32/client/odp.net/managed/common/EF6
+/c/Oracle/Ora12_32/client/odp.net/managed/common/EF6/Oracle.ManagedDataAccess.EntityFramework.dll
+/c/Oracle/Ora12_32/client/odp.net/managed/common/Oracle.DataAccess.Common.Configuration.Section.xsd
+/c/Oracle/Ora12_32/client/odp.net/managed/common/Oracle.ManagedDataAccess.Catalog.xml
+/c/Oracle/Ora12_32/client/odp.net/managed/common/Oracle.ManagedDataAccess.Client.Configuration.Section.xsd
+/c/Oracle/Ora12_32/client/odp.net/managed/common/Oracle.ManagedDataAccess.dll
+/c/Oracle/Ora12_32/client/odp.net/managed/common/Oracle.UnmanagedDataAccess.Catalog.xml
+/c/Oracle/Ora12_32/client/odp.net/managed/common/Oracle.UnmanagedDataAccess.Client.Configuration.Section.xsd
+/c/Oracle/Ora12_32/client/odp.net/managed/PublisherPolicy
+/c/Oracle/Ora12_32/client/odp.net/managed/PublisherPolicy/4
+/c/Oracle/Ora12_32/client/odp.net/managed/PublisherPolicy/4/Policy.4.121.Oracle.ManagedDataAccess.config
+/c/Oracle/Ora12_32/client/odp.net/managed/PublisherPolicy/4/Policy.4.121.Oracle.ManagedDataAccess.dll
+/c/Oracle/Ora12_32/client/odp.net/managed/PublisherPolicy/4/Policy.4.122.Oracle.ManagedDataAccess.config
+/c/Oracle/Ora12_32/client/odp.net/managed/PublisherPolicy/4/Policy.4.122.Oracle.ManagedDataAccess.dll
+/c/Oracle/Ora12_32/client/odp.net/managed/x64
+/c/Oracle/Ora12_32/client/odp.net/managed/x64/configure.bat
+/c/Oracle/Ora12_32/client/odp.net/managed/x64/Oracle.ManagedDataAccessDTC.dll
+/c/Oracle/Ora12_32/client/odp.net/managed/x64/Oracle.ManagedDataAccessIOP.dll
+/c/Oracle/Ora12_32/client/odp.net/managed/x64/OraProvCfg.exe
+/c/Oracle/Ora12_32/client/odp.net/managed/x64/unconfigure.bat
+/c/Oracle/Ora12_32/client/odp.net/managed/x86
+/c/Oracle/Ora12_32/client/odp.net/managed/x86/configure.bat
+/c/Oracle/Ora12_32/client/odp.net/managed/x86/Oracle.ManagedDataAccessDTC.dll
+/c/Oracle/Ora12_32/client/odp.net/managed/x86/Oracle.ManagedDataAccessIOP.dll
+/c/Oracle/Ora12_32/client/odp.net/managed/x86/OraProvCfg.exe
+/c/Oracle/Ora12_32/client/odp.net/managed/x86/unconfigure.bat
+/c/Oracle/Ora12_32/client/odp.net/PublisherPolicy
+/c/Oracle/Ora12_32/client/odp.net/PublisherPolicy/2.x
+/c/Oracle/Ora12_32/client/odp.net/PublisherPolicy/2.x/Policy.2.102.Oracle.DataAccess.config
+/c/Oracle/Ora12_32/client/odp.net/PublisherPolicy/2.x/Policy.2.102.Oracle.DataAccess.dll
+/c/Oracle/Ora12_32/client/odp.net/PublisherPolicy/2.x/Policy.2.111.Oracle.DataAccess.config
+/c/Oracle/Ora12_32/client/odp.net/PublisherPolicy/2.x/Policy.2.111.Oracle.DataAccess.dll
+/c/Oracle/Ora12_32/client/odp.net/PublisherPolicy/2.x/Policy.2.112.Oracle.DataAccess.config
+/c/Oracle/Ora12_32/client/odp.net/PublisherPolicy/2.x/Policy.2.112.Oracle.DataAccess.dll
+/c/Oracle/Ora12_32/client/odp.net/PublisherPolicy/2.x/Policy.2.121.Oracle.DataAccess.config
+/c/Oracle/Ora12_32/client/odp.net/PublisherPolicy/2.x/Policy.2.121.Oracle.DataAccess.dll
+/c/Oracle/Ora12_32/client/odp.net/PublisherPolicy/2.x/Policy.2.122.Oracle.DataAccess.config
+/c/Oracle/Ora12_32/client/odp.net/PublisherPolicy/2.x/Policy.2.122.Oracle.DataAccess.dll
+/c/Oracle/Ora12_32/client/odp.net/PublisherPolicy/4
+/c/Oracle/Ora12_32/client/odp.net/PublisherPolicy/4/Policy.4.112.Oracle.DataAccess.config
+/c/Oracle/Ora12_32/client/odp.net/PublisherPolicy/4/Policy.4.112.Oracle.DataAccess.dll
+/c/Oracle/Ora12_32/client/odp.net/PublisherPolicy/4/Policy.4.121.Oracle.DataAccess.config
+/c/Oracle/Ora12_32/client/odp.net/PublisherPolicy/4/Policy.4.121.Oracle.DataAccess.dll
+/c/Oracle/Ora12_32/client/odp.net/PublisherPolicy/4/Policy.4.122.Oracle.DataAccess.config
+/c/Oracle/Ora12_32/client/odp.net/PublisherPolicy/4/Policy.4.122.Oracle.DataAccess.dll
+/c/Oracle/Ora12_32/client/odp.net/RemoveProjectFiles.bat
+]0;/c/programs/32/Lodestar/Bin
+[32mphdye@XDC-WinLA-009 [33m/c/programs/32/Lodestar/Bin[0m
+$ exit
+exit
+
+Script done on Tue Aug 26 12:36:29 2025
