@@ -1,0 +1,29 @@
+Script started on Tue Aug 26 13:37:09 2025
+==============================================================
+Oracle.DataAccess x86 Diagnostic
+==============================================================
+Process bitness: 32-bit  |  CLR: 4.0.30319.42000
+.NET Framework dir: C:\Windows\Microsoft.NET\Framework\v4.0.30319\
+
+-- Native oci.dll check -------------------------------------
+[WARN] oci.dll failed to load. GetLastError=126 (193=mismatch; 126=not found).
+
+-- Managed Oracle.DataAccess check --------------------------
+[INFO] Loading Oracle.DataAccess by name (GAC/app.config/codeBase).
+[ERR] Failed to load Oracle.DataAccess: System.IO.FileNotFoundException: Could not load file or assembly 'Oracle.DataAccess' or one of its dependencies. The system cannot find the file specified.
+File name: 'Oracle.DataAccess'
+   at System.Reflection.RuntimeAssembly._nLoad(AssemblyName fileName, String codeBase, Evidence assemblySecurity, RuntimeAssembly locationHint, StackCrawlMark& stackMark, IntPtr pPrivHostBinder, Boolean throwOnFileNotFound, Boolean forIntrospection, Boolean suppressSecurityChecks)
+   at System.Reflection.RuntimeAssembly.nLoad(AssemblyName fileName, String codeBase, Evidence assemblySecurity, RuntimeAssembly locationHint, StackCrawlMark& stackMark, IntPtr pPrivHostBinder, Boolean throwOnFileNotFound, Boolean forIntrospection, Boolean suppressSecurityChecks)
+   at System.Reflection.RuntimeAssembly.InternalLoadAssemblyName(AssemblyName assemblyRef, Evidence assemblySecurity, RuntimeAssembly reqAssembly, StackCrawlMark& stackMark, IntPtr pPrivHostBinder, Boolean throwOnFileNotFound, Boolean forIntrospection, Boolean suppressSecurityChecks)
+   at System.Reflection.RuntimeAssembly.InternalLoad(String assemblyString, Evidence assemblySecurity, StackCrawlMark& stackMark, IntPtr pPrivHostBinder, Boolean forIntrospection)
+   at System.Reflection.RuntimeAssembly.InternalLoad(String assemblyString, Evidence assemblySecurity, StackCrawlMark& stackMark, Boolean forIntrospection)
+   at System.Reflection.Assembly.Load(String assemblyString)
+   at Program.Main(String[] args)
+
+WRN: Assembly binding logging is turned OFF.
+To enable assembly bind failure logging, set the registry value [HKLM\Software\Microsoft\Fusion!EnableLog] (DWORD) to 1.
+Note: There is some performance penalty associated with assembly bind failure logging.
+To turn this feature off, remove the registry value [HKLM\Software\Microsoft\Fusion!EnableLog].
+
+
+Script done on Tue Aug 26 13:37:10 2025
