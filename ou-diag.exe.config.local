@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+  <runtime>
+    <assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">
+      <dependentAssembly>
+        <assemblyIdentity name="Oracle.DataAccess"
+                          publicKeyToken="89b483f429c47342"
+                          culture="neutral" />
+        <!-- Keep the redirect; omit codeBase because the DLL will be local -->
+        <bindingRedirect oldVersion="0.0.0.0-2.122.1.0"
+                         newVersion="2.122.1.0" />
+      </dependentAssembly>
+    </assemblyBinding>
+  </runtime>
+
+  <system.data>
+    <DbProviderFactories>
+      <add name="Oracle Data Provider for .NET"
+           invariant="Oracle.DataAccess.Client"
+           description="Oracle Data Provider for .NET"
+           type="Oracle.DataAccess.Client.OracleClientFactory,
+                 Oracle.DataAccess, Version=2.122.1.0,
+                 Culture=neutral, PublicKeyToken=89b483f429c47342"/>
+    </DbProviderFactories>
+  </system.data>
+
+  <!-- Optional: only if your app reads a named connection -->
+  <connectionStrings>
+    <add name="MyConn"
+         providerName="Oracle.DataAccess.Client"
+         connectionString="User Id=SCOTT;Password=TIGER;Data Source=ORCLPDB1"/>
+  </connectionStrings>
+</configuration>

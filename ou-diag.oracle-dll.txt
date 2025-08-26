@@ -1,0 +1,46 @@
+Script started on Tue Aug 26 16:57:53 2025
+==============================================================
+Oracle.DataAccess x86 Diagnostic (auto-discovery)
+==============================================================
+Process bitness: 32-bit | CLR: 4.0.30319.42000
+.NET Framework dir: C:\Windows\Microsoft.NET\Framework\v4.0.30319\
+Base search root: C:\Oracle\Ora12_32\client
+[INFO] Searching for 32-bit oci.dll under base root...
+[OK]  Found 32-bit oci.dll in: C:\Oracle\Ora12_32\client\bin
+
+-- Native oci.dll check -------------------------------------
+[OK]  oci.dll loaded successfully.
+
+[INFO] Using provided Oracle.DataAccess.dll: C:\Oracle\Ora12_32\client\odp.net\bin\2.x\Oracle.DataAccess.dll
+[INFO] PublisherPolicy: C:\Oracle\Ora12_32\client\odp.net\PublisherPolicy\2.x\Policy.2.102.Oracle.DataAccess.config  (FileVersion=<unknown>)
+[INFO] PublisherPolicy: C:\Oracle\Ora12_32\client\odp.net\PublisherPolicy\2.x\Policy.2.102.Oracle.DataAccess.dll  (FileVersion=2.122.1.0)
+[INFO] PublisherPolicy: C:\Oracle\Ora12_32\client\odp.net\PublisherPolicy\2.x\Policy.2.111.Oracle.DataAccess.config  (FileVersion=<unknown>)
+[INFO] PublisherPolicy: C:\Oracle\Ora12_32\client\odp.net\PublisherPolicy\2.x\Policy.2.111.Oracle.DataAccess.dll  (FileVersion=2.122.1.0)
+[INFO] PublisherPolicy: C:\Oracle\Ora12_32\client\odp.net\PublisherPolicy\2.x\Policy.2.112.Oracle.DataAccess.config  (FileVersion=<unknown>)
+[INFO] PublisherPolicy: C:\Oracle\Ora12_32\client\odp.net\PublisherPolicy\2.x\Policy.2.112.Oracle.DataAccess.dll  (FileVersion=2.122.1.0)
+[INFO] PublisherPolicy: C:\Oracle\Ora12_32\client\odp.net\PublisherPolicy\2.x\Policy.2.121.Oracle.DataAccess.config  (FileVersion=<unknown>)
+[INFO] PublisherPolicy: C:\Oracle\Ora12_32\client\odp.net\PublisherPolicy\2.x\Policy.2.121.Oracle.DataAccess.dll  (FileVersion=2.122.1.0)
+[INFO] PublisherPolicy: C:\Oracle\Ora12_32\client\odp.net\PublisherPolicy\2.x\Policy.2.122.Oracle.DataAccess.config  (FileVersion=<unknown>)
+[INFO] PublisherPolicy: C:\Oracle\Ora12_32\client\odp.net\PublisherPolicy\2.x\Policy.2.122.Oracle.DataAccess.dll  (FileVersion=2.122.1.0)
+[INFO] PublisherPolicy: C:\Oracle\Ora12_32\client\odp.net\PublisherPolicy\4\Policy.4.112.Oracle.DataAccess.config  (FileVersion=<unknown>)
+[INFO] PublisherPolicy: C:\Oracle\Ora12_32\client\odp.net\PublisherPolicy\4\Policy.4.112.Oracle.DataAccess.dll  (FileVersion=4.122.1.0)
+[INFO] PublisherPolicy: C:\Oracle\Ora12_32\client\odp.net\PublisherPolicy\4\Policy.4.121.Oracle.DataAccess.config  (FileVersion=<unknown>)
+[INFO] PublisherPolicy: C:\Oracle\Ora12_32\client\odp.net\PublisherPolicy\4\Policy.4.121.Oracle.DataAccess.dll  (FileVersion=4.122.1.0)
+[INFO] PublisherPolicy: C:\Oracle\Ora12_32\client\odp.net\PublisherPolicy\4\Policy.4.122.Oracle.DataAccess.config  (FileVersion=<unknown>)
+[INFO] PublisherPolicy: C:\Oracle\Ora12_32\client\odp.net\PublisherPolicy\4\Policy.4.122.Oracle.DataAccess.dll  (FileVersion=4.122.1.0)
+
+-- Managed Oracle.DataAccess check --------------------------
+[OK]  Assembly loaded via LoadFrom: Oracle.DataAccess, Version=2.122.1.0, Culture=neutral, PublicKeyToken=89b483f429c47342
+
+-- OracleClientFactory.Instance -----------------------------
+[ERR] OracleClientFactory.Instance returned null.
+
+-- DbProviderFactories.GetFactory("Oracle.DataAccess.Client") ---
+[OK]  DbProviderFactories returned: Oracle.DataAccess.Client.OracleClientFactory
+      Factory type: Oracle.DataAccess.Client.OracleClientFactory
+      Factory asm:  Oracle.DataAccess, Version=2.122.1.0, Culture=neutral, PublicKeyToken=89b483f429c47342
+
+==============================================================
+Done.
+
+Script done on Tue Aug 26 16:57:55 2025
