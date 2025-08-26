@@ -1,0 +1,1 @@
+"C:\Program Files (x86)\LODESTAR\Bin\datamgr.exe" -l -f"c:\progra~2\lodestar\bx_test.cfg" -c "Data Source=pbstest2;LSProvider=ODP;" -q PWRLINE -1
