@@ -6,8 +6,8 @@
 //   Program.exe --base "C:\\Oracle\\Ora12_32\\client"
 //   Program.exe --oracle-dll "C:\\Oracle\\Ora12_32\\client\\odp.net\\bin\\2.x\\Oracle.DataAccess.dll"
 //   Program.exe --instant "C:\\Oracle\\Ora12_32\\client\\bin"
-//   Program.exe --conn-name "MyConn"
-//
+//   Program.exe --conn-name "MyConn" --verbose
+
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -22,8 +22,7 @@ static class Program
     [DllImport("kernel32", SetLastError = true, CharSet = CharSet.Unicode)]
     private static extern IntPtr LoadLibrary(string lpFileName);
 
-    private static string _defaultBase = @"C:\Oracle\Ora12_32\client";
-    private static string _defaultOdpRoot = @"C:\Oracle\Ora12_32\client\odp.net";
+    private static string _defaultBase = @"C:\\Oracle\\Ora12_32\\client";
 
     private static int Main(string[] args)
     {
@@ -44,12 +43,40 @@ static class Program
         }
 
         Console.WriteLine("==============================================================");
-        Console.WriteLine("Oracle.DataAccess x86 Diagnostic (auto-discovery)");
+        Console.WriteLine("Oracle.DataAccess x86 Diagnostic (env dump + auto-discovery)");
         Console.WriteLine("==============================================================");
         Console.WriteLine(string.Format("Process bitness: {0} | CLR: {1}",
             (IntPtr.Size == 4 ? "32-bit" : "64-bit"), Environment.Version));
         Console.WriteLine(string.Format(".NET Framework dir: {0}", RuntimeEnvironment.GetRuntimeDirectory()));
         Console.WriteLine(string.Format("Base search root: {0}", baseRoot));
+
+        // --- Environment dump ---
+        Console.WriteLine("\n-- Environment variables ------------------------------------");
+        string path = Environment.GetEnvironmentVariable("PATH") ?? "";
+        string[] parts = path.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+        Console.WriteLine("PATH elements:");
+        for (int i = 0; i < parts.Length; i++)
+        {
+            Console.WriteLine(string.Format("  [{0}] {1}", i, parts[i]));
+        }
+
+        string[] oracleVars = new string[] { "ORACLE_HOME", "TNS_ADMIN", "ORACLE_SID", "NLS_LANG" };
+        for (int i = 0; i < oracleVars.Length; i++)
+        {
+            string v = oracleVars[i];
+            string val = Environment.GetEnvironmentVariable(v);
+            Console.WriteLine(string.Format("{0} = {1}", v, string.IsNullOrEmpty(val) ? "<not set>" : val));
+        }
+
+        // Dump any env var whose name includes ORACLE
+        foreach (System.Collections.DictionaryEntry de in Environment.GetEnvironmentVariables())
+        {
+            string key = de.Key.ToString();
+            if (key.ToUpper().Contains("ORACLE"))
+            {
+                Console.WriteLine(string.Format("{0} = {1}", key, de.Value));
+            }
+        }
 
         // 1) Find 32-bit oci.dll (unless user forced --instant)
         string ociFolder = null;
@@ -60,7 +87,7 @@ static class Program
         }
         else
         {
-            Console.WriteLine("[INFO] Searching for 32-bit oci.dll under base root...");
+            Console.WriteLine("\n[INFO] Searching for 32-bit oci.dll under base root...");
             ociFolder = FindOciFolder32(baseRoot, verbose);
             if (ociFolder == null)
             {
@@ -75,8 +102,8 @@ static class Program
         // Prepend PATH if we found a folder
         if (!string.IsNullOrWhiteSpace(ociFolder))
         {
-            var path = Environment.GetEnvironmentVariable("PATH") ?? "";
-            Environment.SetEnvironmentVariable("PATH", ociFolder + ";" + path);
+            var path0 = Environment.GetEnvironmentVariable("PATH") ?? "";
+            Environment.SetEnvironmentVariable("PATH", ociFolder + ";" + path0);
             if (verbose) Console.WriteLine(string.Format("[INFO] PATH updated (prepended): {0}", ociFolder));
         }
 
@@ -106,7 +133,6 @@ static class Program
         {
             Console.WriteLine("\n[INFO] No --oracle-dll provided; scanning for Oracle.DataAccess.dll under odp.net...");
             string odpRoot = Path.Combine(baseRoot, "odp.net");
-            if (!Directory.Exists(odpRoot)) odpRoot = _defaultOdpRoot;
             var candidates = FindOracleDataAccessDlls(odpRoot, verbose);
             if (candidates.Count == 0)
             {
@@ -114,13 +140,10 @@ static class Program
             }
             else
             {
-                // Choose highest file version
                 candidates.Sort((a, b) => CompareVersions(a.VersionString, b.VersionString));
                 var chosen = candidates[candidates.Count - 1];
                 oracleDllPath = chosen.Path;
                 Console.WriteLine(string.Format("[OK]  Selected Oracle.DataAccess.dll: {0}  (FileVersion={1})", chosen.Path, chosen.VersionString ?? "<unknown>"));
-
-                // Log EF6 / PublisherPolicy nearby if present
                 ReportOdpNetExtras(chosen.Path, verbose);
             }
         }
@@ -269,7 +292,7 @@ static class Program
                 }
             }
         }
-        catch { /* ignore */ }
+        catch { }
         return null;
     }
 
@@ -292,7 +315,7 @@ static class Program
                 list.Add(new OdpDll { Path = path, VersionString = v });
             }
         }
-        catch { /* ignore */ }
+        catch { }
         return list;
     }
 
@@ -312,23 +335,20 @@ static class Program
             var dllDir = Path.GetDirectoryName(oracleDllPath);
             if (dllDir == null) return;
 
-            // PublisherPolicy siblings
+            // PublisherPolicy siblings under odp.net
             var odpRoot = FindAncestor(dllDir, "odp.net");
             if (odpRoot != null)
             {
-                // Look for PublisherPolicy\2.x and \4
                 var pp2 = Path.Combine(odpRoot, "PublisherPolicy", "2.x");
                 var pp4 = Path.Combine(odpRoot, "PublisherPolicy", "4");
                 int count = 0;
-
                 count += ReportPolicies(pp2, verbose);
                 count += ReportPolicies(pp4, verbose);
-
                 if (count == 0 && verbose)
                     Console.WriteLine("[DBG] No Oracle.DataAccess publisher policy files detected.");
             }
 
-            // EF6 dlls (EntityFramework provider), sometimes beside \4\EF6
+            // EF6 dlls beside \4\EF6 (if present)
             var ef6Dir = Path.Combine(dllDir, "EF6");
             if (Directory.Exists(ef6Dir))
             {
@@ -338,7 +358,7 @@ static class Program
                 }
             }
         }
-        catch { /* ignore */ }
+        catch { }
     }
 
     private static int ReportPolicies(string dir, bool verbose)
@@ -356,7 +376,7 @@ static class Program
                 }
             }
         }
-        catch { /* ignore */ }
+        catch { }
         return count;
     }
 
@@ -364,7 +384,7 @@ static class Program
     {
         try
         {
-            var cur = new DirectoryInfo(startDir);
+            var cur = new System.IO.DirectoryInfo(startDir);
             while (cur != null)
             {
                 if (string.Equals(cur.Name, name, StringComparison.OrdinalIgnoreCase))
@@ -372,7 +392,7 @@ static class Program
                 cur = cur.Parent;
             }
         }
-        catch { /* ignore */ }
+        catch { }
         return null;
     }
 
@@ -413,7 +433,6 @@ static class Program
             using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             using (var br = new BinaryReader(fs))
             {
-                // MZ header
                 if (br.ReadUInt16() != 0x5A4D) return false; // 'MZ'
                 fs.Seek(0x3C, SeekOrigin.Begin);
                 int e_lfanew = br.ReadInt32();
@@ -422,8 +441,7 @@ static class Program
                 if (br.ReadUInt32() != 0x00004550) return false; // 'PE\0\0'
                 fs.Seek(20, SeekOrigin.Current); // skip IMAGE_FILE_HEADER (20 bytes)
                 ushort magic = br.ReadUInt16();  // OptionalHeader.Magic
-                // 0x10B = PE32 (32-bit), 0x20B = PE32+ (64-bit)
-                return magic == 0x10B;
+                return magic == 0x10B; // PE32 (32-bit)
             }
         }
         catch { return false; }
