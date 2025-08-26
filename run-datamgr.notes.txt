@@ -1,0 +1,10 @@
+notes
+
+Run it from the app directory:
+powershell -ExecutionPolicy Bypass -File .\Run-datamgr.ps1
+
+To be extra chatty: add -Verbose.
+
+Change -OracleHome if your ODAC path differs.
+
+It copies the 2.122.1.0 Oracle.DataAccess.dll into the app folder (overwrites if different/missing). You can tweak $RequiredOdpVersion if you later standardize on another 2.x build.
