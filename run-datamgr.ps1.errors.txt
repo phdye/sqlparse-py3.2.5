@@ -1,0 +1,47 @@
+Script started on Tue Aug 26 20:04:04 2025
+At C:\Program Files (x86)\Lodestar\bin\run-datamgr.ps1:71 char:42
++ "ORACLE_HOME = {0}" -f ($env:ORACLE_HOME ?? "<not set>") | Write-Host
++                                          ~~
+Unexpected token '??' in expression or statement.
+At C:\Program Files (x86)\Lodestar\bin\run-datamgr.ps1:71 char:41
++ "ORACLE_HOME = {0}" -f ($env:ORACLE_HOME ?? "<not set>") | Write-Host
++                                         ~
+Missing closing ')' in expression.
+At C:\Program Files (x86)\Lodestar\bin\run-datamgr.ps1:71 char:56
++ "ORACLE_HOME = {0}" -f ($env:ORACLE_HOME ?? "<not set>") | Write-Host
++                                                        ~
+Unexpected token ')' in expression or statement.
+At C:\Program Files (x86)\Lodestar\bin\run-datamgr.ps1:71 char:58
++ "ORACLE_HOME = {0}" -f ($env:ORACLE_HOME ?? "<not set>") | Write-Host
++                                                          ~
+An empty pipe element is not allowed.
+At C:\Program Files (x86)\Lodestar\bin\run-datamgr.ps1:72 char:42
++ "TNS_ADMIN   = {0}" -f ($env:TNS_ADMIN   ?? "<not set>") | Write-Host
++                                          ~~
+Unexpected token '??' in expression or statement.
+At C:\Program Files (x86)\Lodestar\bin\run-datamgr.ps1:72 char:39
++ "TNS_ADMIN   = {0}" -f ($env:TNS_ADMIN   ?? "<not set>") | Write-Host
++                                       ~
+Missing closing ')' in expression.
+At C:\Program Files (x86)\Lodestar\bin\run-datamgr.ps1:72 char:56
++ "TNS_ADMIN   = {0}" -f ($env:TNS_ADMIN   ?? "<not set>") | Write-Host
++                                                        ~
+Unexpected token ')' in expression or statement.
+At C:\Program Files (x86)\Lodestar\bin\run-datamgr.ps1:72 char:58
++ "TNS_ADMIN   = {0}" -f ($env:TNS_ADMIN   ?? "<not set>") | Write-Host
++                                                          ~
+An empty pipe element is not allowed.
+At C:\Program Files (x86)\Lodestar\bin\run-datamgr.ps1:73 char:42
++ "ORACLE_SID  = {0}" -f ($env:ORACLE_SID  ?? "<not set>") | Write-Host
++                                          ~~
+Unexpected token '??' in expression or statement.
+At C:\Program Files (x86)\Lodestar\bin\run-datamgr.ps1:73 char:40
++ "ORACLE_SID  = {0}" -f ($env:ORACLE_SID  ?? "<not set>") | Write-Host
++                                        ~
+Missing closing ')' in expression.
+Not all parse errors were reported.  Correct the reported errors and try again.
+    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordException
+    + FullyQualifiedErrorId : UnexpectedToken
+ 
+
+Script done on Tue Aug 26 20:04:07 2025
